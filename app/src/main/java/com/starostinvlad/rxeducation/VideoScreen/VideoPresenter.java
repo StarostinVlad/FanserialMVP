@@ -24,14 +24,14 @@ import static com.starostinvlad.rxeducation.Utils.CLIENT;
 
 public class VideoPresenter {
     private static final String TAG = VideoPresenter.class.getSimpleName();
-    private final VideoFragmentContract view;
+    private final VideoActivityContract view;
     private ArrayList<Player> players;
     private ArrayList<String> arrayList;
     private String cookies;
     private String referer;
     private int currentVoice = 0;
 
-    public VideoPresenter(VideoFragmentContract view) {
+    VideoPresenter(VideoActivityContract view) {
         this.view = view;
     }
 
@@ -76,13 +76,6 @@ public class VideoPresenter {
         return Observable.from(players);
     }
 
-    private void fillHlsList(String url) {
-        arrayList.add(url);
-        Log.d(TAG, "items: " + url);
-
-//        view.showLoading(false);
-    }
-
     private Document loadPage(String url) {
         url = url.contains("fanserial") ? url : "http://fanserial.net" + url;
         referer = url;
@@ -118,8 +111,14 @@ public class VideoPresenter {
                 .flatMap(this::getPlayerList)
                 .observeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(str -> view.showLoading(false),
-                        Throwable::printStackTrace);
+                .subscribe(str -> {
+                            view.showLoading(false);
+                            view.initSpinnerClickListener();
+                        },
+                        (exception) -> {
+                            exception.printStackTrace();
+                            view.alarm(exception.getMessage());
+                        });
     }
 
     void getVideo(int index) {
@@ -130,7 +129,9 @@ public class VideoPresenter {
                 .subscribe(view::initPlayer, Throwable::printStackTrace);
     }
 
-    void getVideo() {
-        getVideo(currentVoice);
+    void onStart() {
+        if (players != null && !players.isEmpty()) {
+            getVideo(currentVoice);
+        }
     }
 }

@@ -20,33 +20,14 @@ public class NewsPresenter {
         this.view = view;
     }
 
-    void updateNews() {
-        if (newsModel == null) {
-            newsModel = new NewsModel();
-            page = 1;
-            NetworkService
-                    .getInstance()
-                    .getJSONApi()
-                    .getNews()
-                    .map(News::getData)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe((arr) -> {
-                                newsModel.setDatumList(arr);
-                                view.fillListView(arr);
-                            },
-                            (Throwable::printStackTrace))
-            ;
-        } else {
-            view.fillListView(newsModel.getDatumList());
-        }
-        view.showLoading(false);
+    void refreshNews() {
+        newsModel = null;
+        loadNews();
     }
 
     void addNews() {
         if (!loading) {
-            loading = true;
-            view.showLoading(true);
+            startLoading();
             NetworkService
                     .getInstance()
                     .getJSONApi()
@@ -57,12 +38,56 @@ public class NewsPresenter {
                     .subscribe((arr) -> {
                                 newsModel.addToDatumList(arr);
                                 view.addToListView(arr);
-                                loading = false;
                                 Log.d(TAG, "offset: " + (20 * page));
                                 page++;
-                            },
-                            (Throwable::printStackTrace));
-            view.showLoading(false);
+                                endLoading();
+                            }, (exception) -> {
+                                exception.printStackTrace();
+                                endLoading();
+                            }
+                    );
         }
     }
+
+    public void loadNews() {
+        if (!loading) {
+            startLoading();
+            if (newsModel == null) {
+                newsModel = new NewsModel();
+                page = 1;
+                NetworkService
+                        .getInstance()
+                        .getJSONApi()
+                        .getNews()
+                        .map(News::getData)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((arr) -> {
+                            newsModel.setDatumList(arr);
+                            view.fillListView(arr);
+                            endLoading();
+                        }, (exception) -> {
+                            endLoading();
+                            if(exception.getMessage().contains("timeout"))
+                                view.alarm("Превышено время ожидания");
+                            exception.printStackTrace();
+                        })
+                ;
+            } else {
+                view.fillListView(newsModel.getDatumList());
+                endLoading();
+            }
+        }
+    }
+
+    void startLoading() {
+        loading = true;
+        view.showLoading(true);
+    }
+
+    void endLoading() {
+        loading = false;
+        view.showLoading(false);
+    }
+
 }

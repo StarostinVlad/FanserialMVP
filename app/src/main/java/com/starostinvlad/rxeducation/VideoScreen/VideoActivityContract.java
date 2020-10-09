@@ -2,7 +2,7 @@ package com.starostinvlad.rxeducation.VideoScreen;
 
 import java.util.ArrayList;
 
-public interface VideoFragmentContract {
+public interface VideoActivityContract {
     void showLoading(boolean b);
 
     void fillSpiner(ArrayList<Player> players);
@@ -10,4 +10,8 @@ public interface VideoFragmentContract {
     void fillToolbar(String title);
 
     void initPlayer(String url);
+
+    void initSpinnerClickListener();
+
+    void alarm(String message);
 }

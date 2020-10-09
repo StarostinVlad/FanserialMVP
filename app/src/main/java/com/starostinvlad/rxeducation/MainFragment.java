@@ -1,34 +1,51 @@
 package com.starostinvlad.rxeducation;
 
+
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.starostinvlad.rxeducation.adapters.SlidePagerAdapter;
 
 import java.util.ArrayList;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
-public class MainActivity extends AppCompatActivity implements MainFragmentContract {
+
+public class MainFragment extends Fragment implements MainFragmentContract {
 
     private final String TAG = getClass().getSimpleName();
+    private BottomNavigationView bottomNavigationView;
     private MainFragmentPresenter mainFragmentPresenter;
     private ViewPager pager;
-    private BottomNavigationView bottomNavigationView;
+
+    public static MainFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        MainFragment fragment = new MainFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-//        getSupportFragmentManager()
-//                .beginTransaction()
-//                .add(R.id.main_fragment_container_id, MainFragment.newInstance(), "mainFragment")
-//                .commit();
+        setRetainInstance(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+
         mainFragmentPresenter = new MainFragmentPresenter(this);
 
-        pager = findViewById(R.id.fragment_container_id);
+        pager = view.findViewById(R.id.fragment_container_id);
 
         mainFragmentPresenter.fillFragments();
 
@@ -61,18 +78,20 @@ public class MainActivity extends AppCompatActivity implements MainFragmentContr
         });
 
 
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView = view.findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> mainFragmentPresenter.activeFragment(
                 item.getItemId(),
                 bottomNavigationView.getSelectedItemId()
         ));
+
+        return view;
     }
 
     @Override
     public void fillPagers(ArrayList<Fragment> fragments) {
         SlidePagerAdapter pagerAdapter = new SlidePagerAdapter(
-                getSupportFragmentManager(),
+                getActivity().getSupportFragmentManager(),
                 fragments.size(),
                 fragments
         );

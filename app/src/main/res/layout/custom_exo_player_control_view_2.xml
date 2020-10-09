@@ -1,13 +1,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/exo_black_opacity_30">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/video_fragment_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/invert_gradient"
         app:titleTextColor="@android:color/white"></androidx.appcompat.widget.Toolbar>
 
 
@@ -29,7 +29,6 @@
         android:background="@drawable/exo_icon_previous" />
 
 
-
     <ImageButton
         android:id="@id/exo_play"
         android:layout_width="60dp"
@@ -44,54 +43,51 @@
         android:layout_gravity="center"
         android:background="@drawable/exo_icon_pause" />
 
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom"
-        android:background="@drawable/gradient" />
-
     <TextView
         android:id="@+id/exo_subtitles"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <LinearLayout
+        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/exo_position"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textColor="@color/exo_white_opacity_70" />
+            android:orientation="horizontal">
 
-        <com.google.android.exoplayer2.ui.DefaultTimeBar
+            <TextView
+                android:id="@+id/exo_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00"
+                android:textColor="@color/exo_white_opacity_70" />
 
-            android:id="@id/exo_progress"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="0.5"
-            app:played_color="@android:color/holo_orange_dark"
-            app:scrubber_color="@android:color/holo_orange_light"
-            app:unplayed_color="@android:color/darker_gray" />
+            <com.google.android.exoplayer2.ui.DefaultTimeBar
 
-        <TextView
-            android:id="@+id/exo_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textColor="@color/exo_white_opacity_70" />
+                android:id="@id/exo_progress"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="0.5"
+                app:played_color="@android:color/holo_orange_dark"
+                app:scrubber_color="@android:color/holo_orange_light"
+                app:unplayed_color="@android:color/darker_gray" />
 
-        <Button
-            android:id="@+id/exo_fullscreen"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/exo_controls_fullscreen_enter" />
+            <TextView
+                android:id="@+id/exo_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00"
+                android:textColor="@color/exo_white_opacity_70" />
+        </LinearLayout>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvAnimals"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
     </LinearLayout>
 
     <View

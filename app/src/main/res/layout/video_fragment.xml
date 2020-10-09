@@ -18,7 +18,7 @@
             android:background="@android:color/black"
             android:keepScreenOn="true"
             android:fitsSystemWindows="true"
-            app:controller_layout_id="@layout/custom_exo_player_control_view"
+            app:controller_layout_id="@layout/custom_exo_player_control_view_2"
             app:fastforward_increment="10000"
             app:rewind_increment="10000"
             app:show_timeout="2000"

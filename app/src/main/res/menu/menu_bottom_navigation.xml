@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_news"
+        android:icon="@drawable/ic_fiber_new"
+        android:title="@string/news" />
+    <item
+        android:id="@+id/navigation_subscribtions"
+        android:icon="@drawable/ic_subscriptions"
+        android:title="@string/subscribtions" />
+    <item
+        android:id="@+id/navigation_next"
+        android:icon="@drawable/ic_queue_play_next"
+        android:title="@string/qeue_next" />
+</menu>

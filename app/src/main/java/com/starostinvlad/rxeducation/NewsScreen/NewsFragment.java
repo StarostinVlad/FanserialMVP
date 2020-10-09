@@ -2,12 +2,12 @@ package com.starostinvlad.rxeducation.NewsScreen;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.rxeducation.R;
 import com.starostinvlad.rxeducation.adapters.NewsListAdapter;
 import com.starostinvlad.rxeducation.pojos.Datum;
@@ -26,6 +26,15 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     private GridView newsGridView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private NewsListAdapter newsGridAdapter;
+
+    public static NewsFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        NewsFragment fragment = new NewsFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,9 +59,9 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
                 }
         );
 
-        swipeRefreshLayout.setOnRefreshListener(newsPresenter::updateNews);
+        swipeRefreshLayout.setOnRefreshListener(newsPresenter::refreshNews);
 
-        newsPresenter.updateNews();
+        newsPresenter.loadNews();
 
         return view;
     }
@@ -83,6 +92,13 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     @Override
     public void addToListView(List<Datum> datumList) {
         newsGridAdapter.addData(datumList);
+    }
+
+    @Override
+    public void alarm(String message) {
+        Snackbar.make(getView(), message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(getResources().getColor(R.color.red))
+                .show();
     }
 
     @Override

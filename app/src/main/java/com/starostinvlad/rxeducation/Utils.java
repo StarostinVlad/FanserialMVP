@@ -1,6 +1,7 @@
 package com.starostinvlad.rxeducation;
 
 import android.content.Context;
+import android.media.browse.MediaBrowser;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -13,11 +14,13 @@ import java.net.Proxy;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
+import rx.subjects.PublishSubject;
 
 public class Utils {
     private static final Utils ourInstance = new Utils();
-
+    public static Boolean AUTH = false;
     public static OkHttpClient CLIENT;
+    public static PublishSubject<Boolean> AUTH_subject = PublishSubject.create();
 
     private Utils() {
     }

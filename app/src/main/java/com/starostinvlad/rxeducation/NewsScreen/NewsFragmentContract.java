@@ -9,4 +9,5 @@ public interface NewsFragmentContract {
     void showLoading(boolean show);
 
     void addToListView(List<Datum> arr);
+    void alarm(String message);
 }
