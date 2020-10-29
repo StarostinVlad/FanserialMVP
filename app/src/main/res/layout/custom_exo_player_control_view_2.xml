@@ -4,12 +4,37 @@
     android:layout_height="match_parent"
     android:background="@color/exo_black_opacity_30">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/video_fragment_toolbar"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:titleTextColor="@android:color/white"></androidx.appcompat.widget.Toolbar>
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
+        <FrameLayout
+            android:id="@+id/exo_rew"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground" />
+
+        <FrameLayout
+            android:id="@+id/exo_ffwd"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground" />
+    </LinearLayout>
+
+
+    <FrameLayout
+        android:id="@+id/blockator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/episode_next"
@@ -48,10 +73,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+
     <LinearLayout
-        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="vertical">
 
         <LinearLayout
@@ -82,27 +108,26 @@
                 android:layout_height="wrap_content"
                 android:text="00:00"
                 android:textColor="@color/exo_white_opacity_70" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/voice_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/ic_voice" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvAnimals"
             android:layout_width="match_parent"
-            android:layout_height="100dp"/>
+            android:layout_height="80dp" />
     </LinearLayout>
 
-    <View
-        android:id="@+id/left_area"
-        android:layout_width="20dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical|left"
-        android:background="@drawable/left_area"
-        android:visibility="gone" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/video_fragment_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:titleTextColor="@android:color/white" />
 
-    <View
-        android:id="@+id/right_area"
-        android:layout_width="20dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical|right"
-        android:background="@drawable/right_area"
-        android:visibility="gone" />
 </FrameLayout>

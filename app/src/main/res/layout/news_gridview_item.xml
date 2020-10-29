@@ -10,36 +10,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:foreground="?android:attr/selectableItemBackground"
         android:layout_margin="5dp"
+        android:foreground="?android:attr/selectableItemBackground"
         app:cardCornerRadius="4dp">
 
         <ImageView
             android:id="@+id/image_item_id"
-            android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:src="@color/colorAccent"
-            android:contentDescription="TODO" />
+            android:scaleType="centerCrop" />
+
         <LinearLayout
-            android:padding="5dp"
-            android:layout_gravity="bottom"
             android:layout_width="match_parent"
             android:layout_height="65dp"
-            android:orientation="vertical"
+            android:layout_gravity="bottom"
             android:background="@drawable/gradient"
-            >
-        <TextView
-            android:id="@+id/title_item_id"
-            android:textColor="@android:color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:orientation="vertical"
+            android:padding="5dp">
 
-        <TextView
-            android:id="@+id/subtitle_item_id"
-            android:textColor="@android:color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/title_item_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/subtitle_item_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

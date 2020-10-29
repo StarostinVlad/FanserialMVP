@@ -2,6 +2,7 @@ package com.starostinvlad.rxeducation.NewsScreen;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,8 @@ import android.widget.GridView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.rxeducation.R;
-import com.starostinvlad.rxeducation.adapters.NewsListAdapter;
-import com.starostinvlad.rxeducation.pojos.Datum;
+import com.starostinvlad.rxeducation.Adapters.NewsListAdapter;
+import com.starostinvlad.rxeducation.GsonModels.Datum;
 
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
 
         newsGridView.setOnScrollChangeListener(
                 (view1, i, i1, i2, i3) -> {
-//                    Log.d(TAG, "i:" + newsGridView.getLastVisiblePosition() + " size: " + (newsGridView.getCount() - 1));
+                    Log.d(TAG, "i:" + newsGridView.getLastVisiblePosition() + " size: " + (newsGridView.getCount() - 1));
                     if (newsGridView.getLastVisiblePosition() == newsGridView.getCount() - 1)
                         newsPresenter.addNews();
                 }
@@ -70,16 +71,16 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         newsGridView = view.findViewById(R.id.news_list_id);
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            newsGridView.setNumColumns(1);
-        } else {
             newsGridView.setNumColumns(2);
+        } else {
+            newsGridView.setNumColumns(3);
         }
         swipeRefreshLayout = view.findViewById(R.id.news_swipe_refresh_id);
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        newsGridView.setNumColumns(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 1);
+        newsGridView.setNumColumns(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
         super.onConfigurationChanged(newConfig);
     }
 
@@ -90,8 +91,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     }
 
     @Override
-    public void addToListView(List<Datum> datumList) {
-        newsGridAdapter.addData(datumList);
+    public void refreshListView() {
+        newsGridAdapter.notifyDataSetChanged();
     }
 
     @Override

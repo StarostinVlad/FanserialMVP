@@ -6,4 +6,8 @@
     <string name="news">Новинки</string>
     <string name="subscribtions">Лента</string>
     <string name="qeue_next">Следующие</string>
+    <string name="share">Поделиться</string>
+    <string name="pip">PIP</string>
+    <string name="quality">Качество</string>
+    <string name="load">Загрузить</string>
 </resources>

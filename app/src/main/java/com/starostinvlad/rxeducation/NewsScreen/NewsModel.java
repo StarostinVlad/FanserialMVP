@@ -1,25 +1,28 @@
 package com.starostinvlad.rxeducation.NewsScreen;
 
-import com.starostinvlad.rxeducation.pojos.Datum;
+import com.starostinvlad.rxeducation.GsonModels.Datum;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class NewsModel {
+class NewsModel {
 
-    List<Datum> datumList;
+    List<Datum> episodeList;
 
-    public List<Datum> getDatumList() {
-        return datumList;
+    List<Datum> getEpisodeList() {
+        if (episodeList == null)
+            episodeList = new ArrayList<>();
+        return episodeList;
     }
 
-    public void setDatumList(List<Datum> datumList) {
-        this.datumList = datumList;
+    void setEpisodeList(List<Datum> episodeList) {
+        this.episodeList = episodeList;
     }
 
-    public void addToDatumList(List<Datum> arr) {
-        if (datumList == null)
-            datumList = arr;
+    void addToDatumList(List<Datum> arr) {
+        if (episodeList == null)
+            episodeList = arr;
         else
-            datumList.addAll(arr);
+            episodeList.addAll(arr);
     }
 }

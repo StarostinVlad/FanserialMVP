@@ -1,70 +1,84 @@
 package com.starostinvlad.rxeducation.VideoScreen;
 
-import android.content.pm.ActivityInfo;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.PictureInPictureParams;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Rational;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.snackbar.Snackbar;
+import com.starostinvlad.rxeducation.Adapters.MyRecyclerViewAdapter;
+import com.starostinvlad.rxeducation.Adapters.PlayersAdapter;
+import com.starostinvlad.rxeducation.GsonModels.Episode;
 import com.starostinvlad.rxeducation.R;
-import com.starostinvlad.rxeducation.adapters.MyRecyclerViewAdapter;
-import com.starostinvlad.rxeducation.adapters.PlayersAdapter;
-import com.starostinvlad.rxeducation.pojos.Datum;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-
 
 public class VideoActivity extends AppCompatActivity implements VideoActivityContract {
     private final String TAG = getClass().getSimpleName();
+    int[] quality = {2097152, 1048576, 524288};
+    private Window window;
+
     private PlayerView playerView;
     private SimpleExoPlayer player;
-    private Datum episode;
+    private Episode episode;
     private Toolbar toolbar;
     private ProgressBar progressBar;
-    private Spinner voicesList;
     private VideoPresenter videoPresenter;
     private View videoContainer;
     private long currentPosition = 0;
-    private Button fullscreenBtn;
-    private int primaryLayoutHeight;
-    private Window window;
-    private boolean fullscreen;
+    private boolean isInPictureInPictureMode;
+    private DefaultTrackSelector trackSelector;
 
+
+    public static void start(Activity activity, Episode episode) {
+        Intent intent = new Intent(activity, VideoActivity.class);
+        if (episode != null)
+            intent.putExtra("SERIA", episode);
+        activity.startActivity(intent);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.video_fragment);
+        setContentView(R.layout.fragment_video);
         if (getIntent() != null && getIntent().hasExtra("SERIA"))
-            episode = (Datum) getIntent().getSerializableExtra("SERIA");
+            episode = (Episode) getIntent().getSerializableExtra("SERIA");
 
         window = this.getWindow();
         hideSystemsElements();
@@ -73,116 +87,145 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
 //        setHasOptionsMenu(true);
 
         progressBar = findViewById(R.id.video_progress_id);
-        voicesList = findViewById(R.id.voice_spiner_id);
 
         videoContainer = findViewById(R.id.video_container);
 
-        Log.d(TAG, "episode: " + episode.getEpisode().getName());
+        Log.d(TAG, "episode: " + episode.getName());
 
         playerView = findViewById(R.id.player_view_id); // creating player view
 
-        primaryLayoutHeight = playerView.getLayoutParams().height;
+        trackSelector = new DefaultTrackSelector();
+        DefaultTrackSelector.Parameters defaultTrackParam = trackSelector.buildUponParameters().build();
+        trackSelector.setParameters(defaultTrackParam);
 
         playerView.setControllerShowTimeoutMs(2000);
         playerView.setControllerAutoShow(true);
+        playerView.hideController();
 
         playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS);
 
-//        fullscreenBtn = findViewById(R.id.exo_fullscreen);
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-//        fullscreenBtn.setOnClickListener(view1 -> fullscreenChange());
-//        fullscreenBtn.setOnClickListener(view1 -> {
-//            if (fullscreen) {
-//                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-//                exitFullscreen();
-//            } else {
-//                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-//                enterFullscreen();
-//            }
-//        });
-
         Button prevBtn = findViewById(R.id.episode_prev);
         Button nextBtn = findViewById(R.id.episode_next);
+
+        ImageButton voices = findViewById(R.id.voice_btn);
+
+        voices.setOnClickListener(view -> {
+            videoPresenter.buildDialog();
+        });
 
         nextBtn.setOnClickListener((view) -> {
             alarm("next");
         });
         prevBtn.setOnClickListener(view -> alarm("prev"));
 
-//        View right_area = findViewById(R.id.right_area);
-//        View left_area = findViewById(R.id.left_area);
+        FrameLayout right_area = findViewById(R.id.exo_ffwd);
+        FrameLayout left_area = findViewById(R.id.exo_rew);
+        FrameLayout blockator = findViewById(R.id.blockator);
 
-        playerView.setOnTouchListener(new View.OnTouchListener() {
+
+        blockator.setOnTouchListener(new View.OnTouchListener() {
+            boolean doubletap;
             private View view;
             private GestureDetector gestureDetector = new GestureDetector(VideoActivity.this, new GestureDetector.SimpleOnGestureListener() {
+
                 @Override
-                public boolean onDoubleTap(MotionEvent event) {
+                public boolean onDoubleTapEvent(MotionEvent event) {
                     Log.d("TEST", "Raw event: " + event.getAction() + ", (" + event.getRawX() + ", " + event.getRawY() + ")");
-                    if (view != null && player != null) {
-                        if (event.getRawX() >= (view.getWidth() / 2.0)) {
-                            player.seekTo(player.getContentPosition() + 10000);
-                            // TODO: 08.10.2020 Добавить анимацию
-                            Log.d("TEST", "onDoubleTap right");
-                        } else {
-                            player.seekTo(player.getContentPosition() + 10000);
-                            // TODO: 08.10.2020 Добавить анимацию
-                            Log.d("TEST", "onDoubleTap left");
+                    if (event.getRawX() > view.getWidth() / 2.0) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            left_area.performContextClick(event.getRawX(), event.getRawY());
+                        }
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            right_area.performContextClick(event.getRawX(), event.getRawY());
                         }
                     }
-                    return super.onDoubleTap(event);
+                    doubletap = true;
+                    return false;
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    Log.d("TEST", "onSingleTapConfirmed event: " + e.getAction());
+                    if (playerView.isControllerVisible()) {
+                        playerView.hideController();
+                        hideSystemsElements();
+                    } else
+                        playerView.showController();
+                    return super.onSingleTapConfirmed(e);
+                }
+
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    Log.d("TEST", "SingTapUp event: " + e.getAction());
+                    return super.onSingleTapUp(e);
                 }
             });
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 view = v;
+                Log.d("TEST", " event: " + event.getAction() + " double: " + doubletap);
                 gestureDetector.onTouchEvent(event);
-                return false;
+                if (doubletap) {
+                    doubletap = false;
+                    return false;
+                }
+                return true;
             }
         });
 
-
         videoPresenter = new VideoPresenter(this);
 
-        videoPresenter.loadData(episode);
+        videoPresenter.loadData(episode.getUrl());
 
-        initRecycle();
-
-    }
-
-    void initRecycle() {
-        ArrayList<Integer> viewColors = new ArrayList<>();
-        viewColors.add(Color.BLUE);
-        viewColors.add(Color.YELLOW);
-        viewColors.add(Color.MAGENTA);
-        viewColors.add(Color.RED);
-        viewColors.add(Color.BLACK);
-
-        ArrayList<String> animalNames = new ArrayList<>();
-        animalNames.add("Horse");
-        animalNames.add("Cow");
-        animalNames.add("Camel");
-        animalNames.add("Sheep");
-        animalNames.add("Goat");
-
-        // set up the RecyclerView
-        RecyclerView recyclerView = findViewById(R.id.rvAnimals);
-        LinearLayoutManager horizontalLayoutManager
-                = new LinearLayoutManager(VideoActivity.this, LinearLayoutManager.HORIZONTAL, false);
-        recyclerView.setLayoutManager(horizontalLayoutManager);
-        MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, viewColors, animalNames);
-        recyclerView.setAdapter(adapter);
     }
 
     @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        Log.d(TAG, "orient: " + newConfig.orientation);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
-            enterFullscreen();
-        else
-            exitFullscreen();
-        super.onConfigurationChanged(newConfig);
+    public void initRecycle(ArrayList<Episode> episodes) {
+        Log.d(TAG, "episodes: " + episodes);
+        RecyclerView recyclerView = findViewById(R.id.rvAnimals);
+        try {
+            LinearLayoutManager horizontalLayoutManager
+                    = new LinearLayoutManager(VideoActivity.this, LinearLayoutManager.HORIZONTAL, false);
+            recyclerView.setLayoutManager(horizontalLayoutManager);
+            MyRecyclerViewAdapter adapter = new MyRecyclerViewAdapter(this, episodes);
+            adapter.setClickListener((view, position) -> {
+                episode = episodes.get(position);
+                videoPresenter.loadData(episode.getUrl());
+            });
+            recyclerView.setAdapter(adapter);
+//            Log.d(TAG, "episodes: " + episodes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "fill complete");
     }
+
+    @Override
+    public void voiceSelectorDialog(ArrayList<Player> players) {
+        PlayersAdapter adapter = new PlayersAdapter(players);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
+                .setAdapter(adapter, (dialogInterface, i) -> videoPresenter.getVideo(i));
+        alertBuilder.show();
+    }
+
+    @Override
+    public void qualitySelectorDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.quality))
+                .setItems(R.array.quality_array, (dialog, which) -> {
+//                        videoPresenter.setQuality(which);
+                    DefaultTrackSelector.Parameters
+                            parameters = trackSelector.buildUponParameters()
+                            .setMaxVideoBitrate(quality[which])
+                            .setForceHighestSupportedBitrate(true)
+                            .build();
+                    trackSelector.setParameters(parameters);
+                });
+        builder.show();
+    }
+
 
     private void hideSystemsElements() {
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
@@ -197,10 +240,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
 
-    private void Show() {
-        window.getDecorView().setVisibility(View.VISIBLE);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.video, menu);
@@ -209,58 +248,63 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // TODO: 08.10.2020 реализовать настройки видео
-//        switch (item.getItemId()) {
-//            case R.id.action_search :
-//                Log.i("item id ", item.getItemId() + "");
-//            default:
-//                return super.onOptionsItemSelected(item);
-//        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    void enterFullscreen() {
-        fullscreen = true;
-        Log.d(TAG, "enter full");
-        ViewGroup.LayoutParams layoutParams = playerView.getLayoutParams();
-//        fullscreenBtn.setBackgroundResource(R.drawable.exo_controls_fullscreen_exit);
-        layoutParams.height = MATCH_PARENT;
-    }
-
-    void exitFullscreen() {
-        fullscreen = false;
-        Log.d(TAG, "exit full");
-        ViewGroup.LayoutParams layoutParams = playerView.getLayoutParams();
-//        fullscreenBtn.setBackgroundResource(R.drawable.exo_controls_fullscreen_enter);
-        layoutParams.height = primaryLayoutHeight;
-    }
-
-
-    private void fullscreenChange(boolean fromBtn) {
-        Log.d(TAG, "height: " + primaryLayoutHeight);
-        ViewGroup.LayoutParams layoutParams = playerView.getLayoutParams();
-        if (layoutParams.height == MATCH_PARENT) {
-//            Show();
-            if (fromBtn)
-                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-            else
-                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-            fullscreenBtn.setBackgroundResource(R.drawable.exo_controls_fullscreen_enter);
-            layoutParams.height = primaryLayoutHeight;
-            fullscreen = false;
-        } else {
-            fullscreen = true;
-            if (fromBtn)
-                this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-            fullscreenBtn.setBackgroundResource(R.drawable.exo_controls_fullscreen_exit);
-            layoutParams.height = MATCH_PARENT;
+        switch (item.getItemId()) {
+            case R.id.pip:
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    currentPosition = player.getCurrentPosition();
+                    PictureInPictureParams pictureInPictureParams = new PictureInPictureParams.Builder()
+                            .setAspectRatio(new Rational(16, 9))
+                            .build();
+                    enterPictureInPictureMode(pictureInPictureParams);
+                    playerView.hideController();
+                    player.play();
+                }
+                Log.i("item id ", item.getItemId() + "");
+                return true;
+            case R.id.share_video:
+                Log.i("item id ", item.getItemId() + "");
+                share();
+                return true;
+            case R.id.quality:
+                qualitySelectorDialog();
+                Log.i("item id ", item.getItemId() + "");
+                return true;
+            case R.id.crop_video:
+                if (playerView.getResizeMode() == AspectRatioFrameLayout.RESIZE_MODE_FIT)
+                    playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
+                else
+                    playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+                Log.i("item id ", item.getItemId() + "");
+                return true;
         }
-        playerView.setLayoutParams(layoutParams);
+        return false;
     }
 
+    private void share() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT,
+                "Смотри сериал " + episode.getName()
+                        + " " + episode.getName()
+                        + " по ссылке "
+                        + episode.getUrl());
+        sendIntent.setType("text/plain");
+
+        Intent shareIntent = Intent.createChooser(sendIntent, null);
+        startActivity(shareIntent);
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
+        Log.d(TAG, "OnPip mode");
+        this.isInPictureInPictureMode = isInPictureInPictureMode;
+        if (player != null)
+            player.seekTo(currentPosition);
+    }
 
     @Override
     public void initPlayer(String uri) {
+        releasePlayer();
         Log.d(TAG, "uri: " + uri);
         // Create a player instance.
         DataSource.Factory dataSourceFactory = new DefaultHttpDataSourceFactory();
@@ -281,24 +325,9 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void initSpinnerClickListener() {
-        voicesList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                videoPresenter.getVideo(i);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                videoPresenter.onStart();
-            }
-        });
-    }
-
-    @Override
     public void alarm(String message) {
         Snackbar.make(videoContainer, message, Snackbar.LENGTH_LONG)
-                .setBackgroundTint(getResources().getColor(R.color.red))
+                .setBackgroundTint(Color.RED)
                 .show();
     }
 
@@ -318,11 +347,14 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     @Override
     public void onPause() {
         super.onPause();
-        if (player != null)
-            currentPosition = player.getCurrentPosition();
-        if (Util.SDK_INT <= 23) {
-            releasePlayer();
+        if (!isInPictureInPictureMode) {
+            if (player != null)
+                currentPosition = player.getCurrentPosition();
+            if (Util.SDK_INT <= 23) {
+                releasePlayer();
+            }
         }
+
     }
 
     @Override
@@ -338,12 +370,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         videoContainer.setVisibility(!b ? View.VISIBLE : View.GONE);
         toolbar.setVisibility(!b ? View.VISIBLE : View.GONE);
         progressBar.setVisibility(b ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void fillSpiner(ArrayList<Player> players) {
-        PlayersAdapter adapter = new PlayersAdapter(players);
-        voicesList.setAdapter(adapter);
     }
 
     @Override

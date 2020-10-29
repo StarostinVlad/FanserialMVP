@@ -5,7 +5,15 @@
     android:layout_height="match_parent"
     tools:context=".LoginScreen.LoginFragment">
 
+    <ProgressBar
+        android:id="@+id/login_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <LinearLayout
+        android:id="@+id/login_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -14,20 +22,26 @@
         android:padding="5dp">
 
         <EditText
+            android:id="@+id/email_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="email" />
+            android:hint="email"
+            android:inputType="textEmailAddress" />
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/password_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:maxEms="30"
+            android:minEms="6" />
 
         <Button
             android:id="@+id/btn_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:text="Войти" />
     </LinearLayout>
 

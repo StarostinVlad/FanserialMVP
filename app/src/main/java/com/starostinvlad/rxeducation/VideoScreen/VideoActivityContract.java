@@ -1,17 +1,20 @@
 package com.starostinvlad.rxeducation.VideoScreen;
 
+import com.starostinvlad.rxeducation.GsonModels.Episode;
+
 import java.util.ArrayList;
 
 public interface VideoActivityContract {
     void showLoading(boolean b);
 
-    void fillSpiner(ArrayList<Player> players);
+    void voiceSelectorDialog(ArrayList<Player> players);
+
+    void qualitySelectorDialog();
 
     void fillToolbar(String title);
 
     void initPlayer(String url);
-
-    void initSpinnerClickListener();
+    void initRecycle(ArrayList<Episode> episodes);
 
     void alarm(String message);
 }

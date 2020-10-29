@@ -2,21 +2,21 @@ package com.starostinvlad.rxeducation.NewsScreen;
 
 import android.util.Log;
 
-import com.starostinvlad.rxeducation.NetworkService;
-import com.starostinvlad.rxeducation.pojos.News;
+import com.starostinvlad.rxeducation.Api.NetworkService;
+import com.starostinvlad.rxeducation.GsonModels.News;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class NewsPresenter {
+class NewsPresenter {
 
-    final String TAG = getClass().getSimpleName();
-    NewsFragmentContract view;
-    int page = 1;
-    NewsModel newsModel;
+    private final String TAG = getClass().getSimpleName();
+    private NewsFragmentContract view;
+    private int page = 1;
+    private NewsModel newsModel;
     private boolean loading = false;
 
-    public NewsPresenter(NewsFragmentContract view) {
+    NewsPresenter(NewsFragmentContract view) {
         this.view = view;
     }
 
@@ -26,18 +26,20 @@ public class NewsPresenter {
     }
 
     void addNews() {
+        Log.d(TAG, "offset: " + (20 * page) + " addnews");
         if (!loading) {
+            Log.d(TAG, "offset: " + (20 * page) + " addnews loading");
             startLoading();
             NetworkService
                     .getInstance()
-                    .getJSONApi()
+                    .getApi()
                     .addNews(20 * page)
                     .map(News::getData)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((arr) -> {
                                 newsModel.addToDatumList(arr);
-                                view.addToListView(arr);
+                                view.refreshListView();
                                 Log.d(TAG, "offset: " + (20 * page));
                                 page++;
                                 endLoading();
@@ -49,7 +51,19 @@ public class NewsPresenter {
         }
     }
 
-    public void loadNews() {
+    void loadNews() {
+//        AppDatabase db = App.getInstance().getDatabase();
+//        DatumDao employeeDao = db.datumDao();
+
+//        Observable.fromCallable(employeeDao::getAll)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
+//                .subscribe((array) -> {
+//                    if (!array.isEmpty()) {
+//                        newsModel.setEpisodeList(array);
+//                        view.fillListView(array);
+//                    }
+//                });
         if (!loading) {
             startLoading();
             if (newsModel == null) {
@@ -57,35 +71,36 @@ public class NewsPresenter {
                 page = 1;
                 NetworkService
                         .getInstance()
-                        .getJSONApi()
+                        .getApi()
                         .getNews()
                         .map(News::getData)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe((arr) -> {
-                            newsModel.setDatumList(arr);
+                            newsModel.setEpisodeList(arr);
+//                            employeeDao.insert(arr);
                             view.fillListView(arr);
                             endLoading();
                         }, (exception) -> {
                             endLoading();
-                            if(exception.getMessage().contains("timeout"))
+                            if (exception.getMessage().contains("timeout"))
                                 view.alarm("Превышено время ожидания");
                             exception.printStackTrace();
                         })
                 ;
             } else {
-                view.fillListView(newsModel.getDatumList());
+                view.fillListView(newsModel.getEpisodeList());
                 endLoading();
             }
         }
     }
 
-    void startLoading() {
+    private void startLoading() {
         loading = true;
         view.showLoading(true);
     }
 
-    void endLoading() {
+    private void endLoading() {
         loading = false;
         view.showLoading(false);
     }
