@@ -21,9 +21,21 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/quality"
-        android:orderInCategory="1"
         android:icon="@drawable/ic_hd"
+        android:orderInCategory="1"
         android:title="@string/quality"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/viewed_checker"
+        android:checkable="true"
+        android:orderInCategory="1"
+        android:title="@string/viewed"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/subscribe_checker"
+        android:checkable="true"
+        android:orderInCategory="1"
+        android:title="@string/subscribe"
         app:showAsAction="never" />
 
 </menu>

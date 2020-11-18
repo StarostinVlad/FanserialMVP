@@ -16,7 +16,7 @@
             android:layout_weight="1"
             android:background="#00000000"
             android:clickable="true"
-            android:focusable="true"
+            android:focusable="false"
             android:foreground="?attr/selectableItemBackground" />
 
         <FrameLayout
@@ -26,7 +26,7 @@
             android:layout_weight="1"
             android:background="#00000000"
             android:clickable="true"
-            android:focusable="true"
+            android:focusable="false"
             android:foreground="?attr/selectableItemBackground" />
     </LinearLayout>
 
@@ -42,7 +42,9 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:layout_marginStart="120dp"
-        android:background="@drawable/exo_icon_next" />
+        android:background="@drawable/exo_icon_next"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground" />
 
 
     <Button
@@ -51,7 +53,9 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:layout_marginEnd="120dp"
-        android:background="@drawable/exo_icon_previous" />
+        android:background="@drawable/exo_icon_previous"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground" />
 
 
     <ImageButton
@@ -59,14 +63,18 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
-        android:background="@drawable/exo_icon_play" />
+        android:background="@drawable/exo_icon_play"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground" />
 
     <ImageButton
         android:id="@id/exo_pause"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
-        android:background="@drawable/exo_icon_pause" />
+        android:background="@drawable/exo_icon_pause"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground" />
 
     <TextView
         android:id="@+id/exo_subtitles"
@@ -98,6 +106,8 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="0.5"
+                android:focusable="true"
+                android:nextFocusDown="@+id/voice_btn"
                 app:played_color="@android:color/holo_orange_dark"
                 app:scrubber_color="@android:color/holo_orange_light"
                 app:unplayed_color="@android:color/darker_gray" />
@@ -109,19 +119,22 @@
                 android:text="00:00"
                 android:textColor="@color/exo_white_opacity_70" />
 
-            <androidx.appcompat.widget.AppCompatImageButton
+            <ImageButton
                 android:id="@+id/voice_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:background="@drawable/ic_voice" />
+                android:background="@drawable/ic_voice"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:nextFocusDown="@+id/rvAnimals" />
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvAnimals"
             android:layout_width="match_parent"
-            android:layout_height="80dp" />
+            android:layout_height="80dp"/>
     </LinearLayout>
 
     <androidx.appcompat.widget.Toolbar

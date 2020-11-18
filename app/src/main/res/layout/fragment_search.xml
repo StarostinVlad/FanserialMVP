@@ -11,7 +11,9 @@
         <SearchView
             android:id="@+id/searchview_btn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:descendantFocusability="afterDescendants"
+            />
 
     </Toolbar>
 
@@ -23,8 +25,7 @@
             android:id="@+id/search_listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@android:color/transparent"
-            />
+            android:divider="@android:color/transparent" />
 
         <ProgressBar
             android:id="@+id/search_progressbar"
