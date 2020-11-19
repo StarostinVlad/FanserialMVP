@@ -44,7 +44,8 @@
         android:layout_marginStart="120dp"
         android:background="@drawable/exo_icon_next"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground" />
+        android:foreground="?attr/selectableItemBackground"
+        android:visibility="gone" />
 
 
     <Button
@@ -55,7 +56,8 @@
         android:layout_marginEnd="120dp"
         android:background="@drawable/exo_icon_previous"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground" />
+        android:foreground="?attr/selectableItemBackground"
+        android:visibility="gone" />
 
 
     <ImageButton
@@ -134,7 +136,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvAnimals"
             android:layout_width="match_parent"
-            android:layout_height="80dp"/>
+            android:layout_height="80dp" />
     </LinearLayout>
 
     <androidx.appcompat.widget.Toolbar

@@ -22,4 +22,8 @@ public interface VideoActivityContract {
     void checkViewed(boolean viewed);
 
     void checkSubscribed(String id, boolean subscribed);
+
+    void prevBtn(Episode episode);
+
+    void nextBtn(Episode episode);
 }

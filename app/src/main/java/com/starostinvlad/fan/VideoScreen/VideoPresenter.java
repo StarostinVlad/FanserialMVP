@@ -122,6 +122,24 @@ class VideoPresenter {
             Log.d(TAG, "getPageAttrs subscribed: " + subscribed);
             view.checkSubscribed(id, subscribed);
         }
+        if (!document.select("a.arrow.prev").isEmpty()) {
+            String prevHref = document.select("a.arrow.prev").first().attr("href");
+            String prevTitle = document.select("a.arrow.prev > span.arrow-label > span > span.number").first().text();
+            Episode episode = new Episode();
+            episode.setUrl(prevHref);
+            episode.setName(prevTitle);
+            view.prevBtn(episode);
+        }
+        if (!document.select("a.arrow.next").isEmpty()) {
+            String nextHref = document.select("a.arrow.next").first().attr("href");
+            String nextTitle = document.select("a.arrow.next > span.arrow-label > span > span.number").first().text();
+            Episode episode = new Episode();
+            episode.setUrl(nextHref);
+            episode.setName(nextTitle);
+            view.nextBtn(episode);
+        }
+
+
     }
 
     void loadData(String url) {
@@ -146,6 +164,10 @@ class VideoPresenter {
                             exception.printStackTrace();
                             view.alarm(exception.getMessage());
                         }).isDisposed();
+    }
+
+    void clearSeasonList() {
+        episodes = null;
     }
 
     private void fillSeasonList(Document document) {

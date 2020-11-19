@@ -44,6 +44,8 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
 
         presenter = new ViewedPresenter(this);
 
+        presenter.updateSubcribtions();
+
         presenter.loadData();
 
         return view;

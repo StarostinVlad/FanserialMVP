@@ -74,6 +74,8 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     private boolean viewed;
     private boolean subscribed;
     private String id = "";
+    private Button nextBtn;
+    private Button prevBtn;
 
 
     public static void start(Activity activity, Episode episode) {
@@ -124,15 +126,13 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS);
 
 
-        Button prevBtn = findViewById(R.id.episode_prev);
-        Button nextBtn = findViewById(R.id.episode_next);
+        prevBtn = findViewById(R.id.episode_prev);
+        nextBtn = findViewById(R.id.episode_next);
 
         ImageButton voices = findViewById(R.id.voice_btn);
 
         voices.setOnClickListener(view -> videoPresenter.buildDialog());
 
-        nextBtn.setOnClickListener((view) -> alarm("next"));
-        prevBtn.setOnClickListener(view -> alarm("prev"));
 
         FrameLayout right_area = findViewById(R.id.exo_ffwd);
         FrameLayout left_area = findViewById(R.id.exo_rew);
@@ -195,6 +195,26 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
 
         videoPresenter.loadData(episode.getUrl());
 
+    }
+
+    @Override
+    public void prevBtn(Episode episode) {
+        prevBtn.setVisibility(View.VISIBLE);
+        prevBtn.setOnClickListener(view -> {
+            videoPresenter.clearSeasonList();
+            videoPresenter.loadData(episode.getUrl());
+            prevBtn.setVisibility(View.GONE);
+        });
+    }
+
+    @Override
+    public void nextBtn(Episode episode) {
+        nextBtn.setVisibility(View.VISIBLE);
+        nextBtn.setOnClickListener(view -> {
+            videoPresenter.clearSeasonList();
+            videoPresenter.loadData(episode.getUrl());
+            nextBtn.setVisibility(View.GONE);
+        });
     }
 
     @Override
