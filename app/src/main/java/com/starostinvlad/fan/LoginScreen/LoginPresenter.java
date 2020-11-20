@@ -41,7 +41,7 @@ class LoginPresenter {
                         response -> {
                             if (response.isSuccessful()) {
                                 Token token = response.body();
-                                App.TOKEN_subject.onNext(token.getToken());
+                                App.getInstance().getTokenSubject().onNext(token.getToken());
                                 Log.d(TAG, "token: " + token.getToken());
                             } else {
                                 try {
@@ -73,12 +73,12 @@ class LoginPresenter {
                 .build();
         Request getSeriaPage = new Request
                 .Builder()
-                .url(App.DOMAIN + "/authorization/")
+                .url(App.getInstance().getDomain() + "/authorization/")
                 .post(requestBody)
                 .build();
 
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
                 Document doc = Jsoup.parse(response.body().string());
                 Log.d(TAG, "doc: " + doc.body());

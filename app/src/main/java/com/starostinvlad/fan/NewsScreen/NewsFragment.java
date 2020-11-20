@@ -30,7 +30,6 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private NewsWithAdRVAdapter newsRecyclerViewAdapter;
-    private boolean isSubscriptions;
     private StaggeredGridLayoutManager staggeredGridLayoutManager;
 
     @Override
@@ -46,8 +45,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         initViews(view);
 
         if (getArguments() != null) {
-            isSubscriptions = getArguments().getBoolean(getString(R.string.subscriptions_extra));
-            newsPresenter = new NewsPresenter(this, true);
+            boolean isSubscriptions = getArguments().getBoolean(getString(R.string.subscriptions_extra));
+            newsPresenter = new NewsPresenter(this, isSubscriptions);
         } else
             newsPresenter = new NewsPresenter(this);
 

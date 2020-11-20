@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import com.appodeal.ads.Appodeal;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -48,20 +49,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
 public class VideoActivity extends AppCompatActivity implements VideoActivityContract {
     private final String TAG = getClass().getSimpleName();
     int[] quality = {2097152, 1048576, 524288};
-    @BindView(R.id.player_view_id)
+
     PlayerView playerView;
-    @BindView(R.id.video_fragment_toolbar)
     Toolbar toolbar;
-    @BindView(R.id.video_progress_id)
     ProgressBar progressBar;
-    @BindView(R.id.video_container)
     View videoContainer;
     private Window window;
     private SimpleExoPlayer player;
@@ -90,7 +86,11 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_video);
-        ButterKnife.bind(this);
+        playerView = findViewById(R.id.player_view_id);
+        toolbar = findViewById(R.id.video_fragment_toolbar);
+        progressBar = findViewById(R.id.video_progress_id);
+        videoContainer = findViewById(R.id.video_container);
+
         if (getIntent() != null && getIntent().hasExtra(getString(R.string.episode_extra)))
             episode = (Episode) getIntent().getSerializableExtra(getString(R.string.episode_extra));
         else if (getIntent() != null && getIntent().hasExtra("NAME")) {
@@ -98,9 +98,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
             episode.setName(getIntent().getStringExtra("NAME"));
             episode.setUrl(getIntent().getStringExtra("HREF"));
         } else {
-            new AlertDialog.Builder(this)
-                    .setMessage(R.string.video_error)
-                    .setOnDismissListener(dialogInterface -> finish()).show();
+            showDialog(getString(R.string.video_error));
         }
 
         window = this.getWindow();
@@ -193,8 +191,21 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
 
         videoPresenter = new VideoPresenter(this);
 
-        videoPresenter.loadData(episode.getUrl());
+        if (App.getInstance().isReview()) {
+            showDialog(getString(R.string.on_review));
+        } else {
+            Appodeal.show(this, Appodeal.INTERSTITIAL);
+            videoPresenter.loadData(episode.getUrl());
+        }
 
+    }
+
+    @Override
+    public void showDialog(String msg) {
+        new AlertDialog.Builder(this)
+                .setMessage(msg)
+                .setPositiveButton("OK", (dialogInterface, i) -> dialogInterface.dismiss())
+                .setOnDismissListener(dialogInterface -> finish()).show();
     }
 
     @Override
@@ -291,7 +302,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         getMenuInflater().inflate(R.menu.video, menu);
         MenuItem viewed_item = menu.findItem(R.id.viewed_checker);
         MenuItem subscribe_item = menu.findItem(R.id.subscribe_checker);
-        if (App.TOKEN_subject.getValue().isEmpty()) {
+        if (App.getInstance().getTokenSubject().getValue().isEmpty()) {
             viewed_item.setEnabled(false);
             subscribe_item.setEnabled(false);
         } else {
@@ -355,7 +366,8 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     private void share() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, String.format("Смотри сериал %s %s по ссылке %s", toolbar.getTitle().toString(), episode.getName(), episode.getUrl()));
+        String url = episode.getUrl().contains(App.getInstance().getDomain()) ? episode.getUrl() : App.getInstance().getDomain() + episode.getUrl();
+        sendIntent.putExtra(Intent.EXTRA_TEXT, String.format("Смотри сериал %s по ссылке %s", toolbar.getTitle().toString(), url));
         sendIntent.setType("text/plain");
 
         Intent shareIntent = Intent.createChooser(sendIntent, null);

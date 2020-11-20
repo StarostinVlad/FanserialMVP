@@ -38,7 +38,7 @@ class ViewedPresenter {
         view.showButton(false);
         NetworkService.getInstance()
                 .getApi()
-                .getViewed(App.TOKEN_subject.getValue())
+                .getViewed(App.getInstance().getTokenSubject().getValue())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -57,14 +57,14 @@ class ViewedPresenter {
     String getSubscribtions() {
         Request request = new Request
                 .Builder()
-                .addHeader("referer", App.DOMAIN + "/profile/subscriptions/")
+                .addHeader("referer", App.getInstance().getDomain() + "/profile/subscriptions/")
                 .addHeader("x-requested-with", "XMLHttpRequest")
-                .url(App.DOMAIN + "/profile/subscriptions/")
+                .url(App.getInstance().getDomain() + "/profile/subscriptions/")
                 .get()
                 .build();
         Log.d(TAG, "subscribeRequest: " + request.url());
         try {
-            Response response = App.CLIENT.newCall(request).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(request).execute();
             if (response.code() == 200 & response.body() != null) {
                 Log.d(TAG, "subscribeRequest:" + response.headers("Set-Cookie").toString());
                 Document doc = Jsoup.parse(response.body().string());

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Fanserial.net</string>
+    <string name="app_name">FSerials</string>
 
     <string name="news">Новинки</string>
     <string name="subscribtions">Лента</string>
@@ -61,4 +61,5 @@
         <strong>почту:&nbsp;</strong><a href="mailto:mr.starostinvlad@gmail.com">mr.starostinvlad@gmail.com</a>&nbsp;<br>Вы получите ответ в течение суток с момента получения письма.</p>
         </body></html>
         ]]></string>
+    <string name="on_review">Данный сериал недоступен в вашей стране</string>
 </resources>

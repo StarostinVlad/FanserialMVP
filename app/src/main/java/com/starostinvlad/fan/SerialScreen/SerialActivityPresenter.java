@@ -50,7 +50,7 @@ class SerialActivityPresenter {
     private List<String> loadPage(String url) {
         Request getSeriaPage = new Request.Builder().url(url).get().build();
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
                 String cookies = response.header("Set-Cookie");
                 Document doc = Jsoup.parse(response.body().string());
@@ -62,7 +62,7 @@ class SerialActivityPresenter {
                     return seasons;
                 } else {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                        seasons = elements.stream().map(val -> App.DOMAIN + val.attr("href")).collect(Collectors.toList());
+                        seasons = elements.stream().map(val -> App.getInstance().getDomain() + val.attr("href")).collect(Collectors.toList());
                     }
                 }
                 return seasons;

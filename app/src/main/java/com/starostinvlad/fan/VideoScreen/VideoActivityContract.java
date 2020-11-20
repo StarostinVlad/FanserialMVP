@@ -26,4 +26,6 @@ public interface VideoActivityContract {
     void prevBtn(Episode episode);
 
     void nextBtn(Episode episode);
+
+    void showDialog(String msg);
 }

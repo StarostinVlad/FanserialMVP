@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.appodeal.ads.Appodeal;
+import com.appodeal.ads.native_ad.views.NativeAdViewNewsFeed;
 import com.squareup.picasso.Picasso;
 import com.starostinvlad.fan.GsonModels.Datum;
 import com.starostinvlad.fan.R;
@@ -102,34 +104,16 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     class AdViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
+        NativeAdViewNewsFeed nav_nf;
 
         AdViewHolder(View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.title_ad_item);
+            nav_nf = itemView.findViewById(R.id.native_ad_view_news_feed);
 
         }
 
         void fill() {
-            title.setText("РЕКЛАМА!");
+            nav_nf.setNativeAd(Appodeal.getNativeAds(1).get(0));
         }
     }
-
-//    @Override
-//    public View getView(int i, View view, ViewGroup viewGroup) {
-//        Context context = viewGroup.getContext();
-//        if (view == null)
-//            view = LayoutInflater.from(context).inflate(R.layout.news_gridview_item, viewGroup, false);
-//
-//        TextView title = view.findViewById(R.id.title_item_id);
-//        title.setText(elements.get(i).getSerial().getName());
-//
-//        TextView sub_title = view.findViewById(R.id.subtitle_item_id);
-//        sub_title.setText(elements.get(i).getEpisode().getName());
-//
-//        ImageView imageView = view.findViewById(R.id.image_item_id);
-//        Picasso.with(context).load(elements.get(i).getEpisode().getImages().getMedium()).placeholder(R.color.cardview_dark_background).into(imageView);
-//
-//        return view;
-//    }
 }

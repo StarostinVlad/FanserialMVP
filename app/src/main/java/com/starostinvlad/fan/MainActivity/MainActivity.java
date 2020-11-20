@@ -4,10 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.appodeal.ads.Appodeal;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.starostinvlad.fan.Adapters.SlidePagerAdapter;
 import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.BuildConfig;
 import com.starostinvlad.fan.LoginScreen.LoginFragment;
 import com.starostinvlad.fan.NewsScreen.NewsFragment;
 import com.starostinvlad.fan.R;
@@ -15,13 +16,13 @@ import com.starostinvlad.fan.SearchScreen.SearchFragment;
 import com.starostinvlad.fan.SettingsScreen.SettingsFragment;
 import com.starostinvlad.fan.ViewedScreen.ViewedFragment;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.util.ArrayList;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
+
+import static android.text.TextUtils.isEmpty;
 
 public class MainActivity extends AppCompatActivity implements MainActivityContract {
 
@@ -39,12 +40,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FirebaseMessaging.getInstance().subscribeToTopic("RxEducation");
+        if (BuildConfig.BUILD_TYPE.toLowerCase().equals("debug"))
+            Appodeal.setTesting(true);
+        Appodeal.initialize(this, "5b840848384e83385753354fd57248b212fbd0a454d85083", Appodeal.INTERSTITIAL | Appodeal.NATIVE, true);
+
 
         pager = findViewById(R.id.fragment_container_id);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        App.TOKEN_subject.subscribe(token -> {
+        App.getInstance().getTokenSubject().subscribe(token -> {
                     Log.d(TAG, "onCreate: token: " + token);
                     fillFragments(token);
                     activeFragment(bottomNavigationView.getSelectedItemId(), 0);
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         ArrayList<Fragment> fragments = new ArrayList<>();
         fragments.add(new NewsFragment());
 
-        if (StringUtils.isEmpty(token)) {
+        if (isEmpty(token)) {
             fragments.add(new SearchFragment());
             fragments.add(new LoginFragment());
             fragments.add(new LoginFragment());

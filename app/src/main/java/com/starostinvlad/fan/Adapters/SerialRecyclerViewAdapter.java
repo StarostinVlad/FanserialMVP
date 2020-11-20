@@ -94,7 +94,7 @@ public class SerialRecyclerViewAdapter extends RecyclerView.Adapter<SerialRecycl
         Log.d(TAG, "url: " + url);
         Request getSeriaPage = new Request.Builder().url(url).get().build();
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
                 Document doc = Jsoup.parse(response.body().string());
                 Elements elements = doc.select("#episode_list > li > div > div");

@@ -44,7 +44,7 @@ class NewsPresenter {
                     NetworkService
                             .getInstance()
                             .getApi()
-                            .addSubscritions(App.TOKEN_subject.getValue(), 20 * page)
+                            .addSubscritions(App.getInstance().getTokenSubject().getValue(), 20 * page)
                     : NetworkService
                     .getInstance()
                     .getApi()
@@ -54,6 +54,7 @@ class NewsPresenter {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((arr) -> {
+                                arr.add(8, null);
                                 newsModel.addToDatumList(arr);
                                 view.refreshListView();
                                 Log.d(TAG, "offset: " + (20 * page));
@@ -85,7 +86,7 @@ class NewsPresenter {
                         NetworkService
                                 .getInstance()
                                 .getApi()
-                                .getSubscriptions(App.TOKEN_subject.getValue())
+                                .getSubscriptions(App.getInstance().getTokenSubject().getValue())
                         :
                         NetworkService
                                 .getInstance()

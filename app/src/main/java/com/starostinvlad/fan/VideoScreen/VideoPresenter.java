@@ -51,7 +51,7 @@ class VideoPresenter {
                 .build();
 
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
                 Document doc = Jsoup.parse(response.body().string());
                 String data_config = doc
@@ -81,7 +81,7 @@ class VideoPresenter {
     }
 
     private Document loadPage(String url) {
-        url = url.contains("fanserial") ? url : App.DOMAIN + url;
+        url = url.contains("fanserial") ? url : App.getInstance().getDomain() + url;
         referer = url;
         Request getSeriaPage = new Request.Builder()
 //                .addHeader("Cookie", App
@@ -92,7 +92,7 @@ class VideoPresenter {
                 .get()
                 .build();
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
 //                cookies = response.header("Set-Cookie");
                 Document doc = Jsoup.parse(response.body().string());
@@ -162,7 +162,7 @@ class VideoPresenter {
                         ,
                         (exception) -> {
                             exception.printStackTrace();
-                            view.alarm(exception.getMessage());
+                            sendErrorMsg(exception.getMessage());
                         }).isDisposed();
     }
 
@@ -177,7 +177,10 @@ class VideoPresenter {
                     .observeOn(Schedulers.io())
                     .map(this::getSeasonEpisodeList)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(view::initRecycle, Throwable::printStackTrace);
+                    .subscribe(view::initRecycle, throwable -> {
+                        sendErrorMsg(throwable.getMessage());
+                        throwable.printStackTrace();
+                    }).isDisposed();
     }
 
     private Observable<String> getSeasonUrl(Document document) {
@@ -185,7 +188,7 @@ class VideoPresenter {
         Log.d(TAG, "seasonHref: " + elements);
         int childNumber = elements.size() == 3 ? 2 : 1;
         String seasonHref = elements.get(childNumber).attr("href");
-        seasonHref = App.DOMAIN + seasonHref;
+        seasonHref = App.getInstance().getDomain() + seasonHref;
         Log.d(TAG, "seasonHref: " + seasonHref);
         return Observable.just(seasonHref);
     }
@@ -194,7 +197,7 @@ class VideoPresenter {
         Log.d(TAG, "url: " + url);
         Request getSeriaPage = new Request.Builder().url(url).get().build();
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
 //                cookies = response.header("Set-Cookie");
                 Document doc = Jsoup.parse(response.body().string());
@@ -222,7 +225,10 @@ class VideoPresenter {
         Observable.fromCallable(() -> getHlsUrl(players.get(index)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(view::initPlayer, Throwable::printStackTrace).isDisposed();
+                .subscribe(view::initPlayer, throwable -> {
+                    sendErrorMsg(throwable.getMessage());
+                    throwable.printStackTrace();
+                }).isDisposed();
     }
 
     void onStart() {
@@ -235,6 +241,17 @@ class VideoPresenter {
         view.voiceSelectorDialog(players);
     }
 
+    private void sendErrorMsg(String msg) {
+        if (msg.contains("timeout"))
+            msg = "Превышено время ожидания";
+        else if (msg.contains("returned null"))
+            msg = "Что-то пошло не так";
+        else if (msg.contains("review"))
+            msg = "Сериал недоступен в вашей стране";
+        view.showDialog(msg);
+
+    }
+
     void putToViewed(boolean check) {
         String id = referer.substring(22);
         id = id.substring(0, id.indexOf("-"));
@@ -244,7 +261,10 @@ class VideoPresenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         val -> Log.d(TAG, "answer: " + val),
-                        Throwable::printStackTrace
+                        throwable -> {
+                            sendErrorMsg(throwable.getMessage());
+                            throwable.printStackTrace();
+                        }
                 )
                 .isDisposed();
     }
@@ -260,12 +280,12 @@ class VideoPresenter {
                 .Builder()
 //                .addHeader("host", "fanserial.net")
 //                .addHeader("cookie", cook)
-                .url(App.DOMAIN + "/profile/viewed/" + id + "/")
+                .url(App.getInstance().getDomain() + "/profile/viewed/" + id + "/")
                 .post(requestBody)
                 .build();
         Log.d(TAG, "viewedRequest: " + getSeriaPage.url());
         try {
-            Response response = App.CLIENT.newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
             if (response.code() == 200 & response.body() != null) {
 
                 Document doc = Jsoup.parse(response.body().string());
@@ -291,12 +311,12 @@ class VideoPresenter {
                 .Builder()
 //                .addHeader("host", "fanserial.net")
 //                .addHeader("cookie", cook)
-                .url(App.DOMAIN + "/profile/subscriptions/" + id + "/")
+                .url(App.getInstance().getDomain() + "/profile/subscriptions/" + id + "/")
                 .post(requestBody)
                 .build();
         Log.d(TAG, "subscribeRequest: " + request.url());
         try {
-            Response response = App.CLIENT.newCall(request).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(request).execute();
             if (response.code() == 200 & response.body() != null) {
                 Log.d(TAG, "subscribeRequest:" + response.headers("Set-Cookie").toString());
                 Document doc = Jsoup.parse(response.body().string());
@@ -317,7 +337,10 @@ class VideoPresenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         val -> Log.d(TAG, "answer: " + val),
-                        Throwable::printStackTrace
+                        throwable -> {
+                            sendErrorMsg(throwable.getMessage());
+                            throwable.printStackTrace();
+                        }
                 )
                 .isDisposed();
     }

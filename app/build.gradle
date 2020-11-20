@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 29
@@ -9,13 +10,34 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 14
-        versionName "2.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionName "2.0.1"
+    }
+    signingConfigs {
+        release {
+            storeFile file('..\\keystore_fserials.jks')
+            storePassword 'Jisus131097'
+            keyAlias = 'fs_key'
+            keyPassword 'Fuckit97'
+        }
+        debug {
+            storeFile file('..\\keystore_fserials.jks')
+            storePassword 'Jisus131097'
+            keyAlias = 'fs_key'
+            keyPassword 'Fuckit97'
+        }
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {
@@ -23,14 +45,23 @@ android {
         targetCompatibility = 1.8
     }
 }
+repositories {
+    google()
+    jcenter()
+    maven { url 'https://maven.google.com' }
+    maven { url "https://artifactory.appodeal.com/appodeal" }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+    implementation 'com.appodeal.ads:sdk:2.7.4.0'
+    implementation 'com.explorestack:consent:1.0.2'
+    implementation 'com.google.android.gms:play-services-ads-identifier:17.0.0'
 
     implementation 'com.google.firebase:firebase-messaging:21.0.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
 
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -57,13 +88,9 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.13.1'
 
     implementation "androidx.room:room-runtime:2.2.5"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     annotationProcessor "androidx.room:room-compiler:2.2.5"
     implementation "androidx.room:room-rxjava2:2.2.5"
-
-    implementation 'commons-lang:commons-lang:2.6'
-
-    implementation 'com.jakewharton:butterknife:10.2.3'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
 
     implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
 

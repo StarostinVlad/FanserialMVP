@@ -1,6 +1,8 @@
 package com.starostinvlad.fan;
 
 import android.app.Application;
+import android.os.Build;
+import android.util.Log;
 
 import com.franmontiel.persistentcookiejar.ClearableCookieJar;
 import com.franmontiel.persistentcookiejar.PersistentCookieJar;
@@ -21,58 +23,66 @@ import okhttp3.OkHttpClient;
 
 public class App extends Application {
 
-    public static OkHttpClient CLIENT;
-    public static String DOMAIN = "https://fanserial.net";
-    public static BehaviorSubject<String> TOKEN_subject = BehaviorSubject.createDefault("");
     private static App instance;
+    private final String TAG = getClass().getSimpleName();
+    private BehaviorSubject<String> tokenSubject = BehaviorSubject.createDefault("");
+    private OkHttpClient okHttpClient;
+    private String domain = "https://fanserial.net";
     private AppDatabase database;
     private Preferences preferences;
+    private String review = "";
 
     public static App getInstance() {
         return instance;
+    }
+
+    public boolean isReview() {
+        Log.d(TAG, "isReview: " + review);
+        return Build.PRODUCT.matches(".*_?sdk_?.*") || review.equals(BuildConfig.VERSION_NAME);
+    }
+
+    public void setReview(String review) {
+        this.review = review;
+    }
+
+    public BehaviorSubject<String> getTokenSubject() {
+        return tokenSubject;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public OkHttpClient getOkHttpClient() {
+        return okHttpClient;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
+
         database = Room.databaseBuilder(this, AppDatabase.class, "database")
                 .fallbackToDestructiveMigration()
                 .build();
         preferences = new Preferences(getApplicationContext());
 
-        Authenticator proxyAuthenticator = (route, response) -> {
-            String credential = Credentials.basic("GiMvRf5na6", "xp9O9ViUkt");
-            return response.request().newBuilder()
-                    .header("Proxy-Authorization", credential)
-                    .build();
-        };
+        tokenSubject.onNext(preferences.getToken());
+        tokenSubject.subscribe(token -> preferences.setToken(token)).isDisposed();
 
-        TOKEN_subject.onNext(preferences.getToken());
-        TOKEN_subject.subscribe(token -> preferences.setToken(token)).isDisposed();
-
-        ClearableCookieJar cookieJar =
-                new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(getApplicationContext()));
-
-        CLIENT = new OkHttpClient.Builder()
-                .proxy(new Proxy(Proxy.Type.HTTP,
-                        new InetSocketAddress("45.138.159.126", 53429)))
-                .cookieJar(cookieJar)
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .proxyAuthenticator(proxyAuthenticator)
-                .build();
-
-        final Picasso picasso = new Picasso.Builder(getApplicationContext())
-                .downloader(new OkHttp3Downloader(CLIENT))
-                .build();
-        picasso.setIndicatorsEnabled(true);
-        Picasso.setSingletonInstance(picasso);
 //
-//        try {
-//            Utils.init(this);
-//        } catch (IllegalStateException e) {
-//            e.printStackTrace();
-//        }
+//        okHttpClient = new OkHttpClient.Builder()
+//                .proxy(new Proxy(Proxy.Type.HTTP,
+//                        new InetSocketAddress("45.138.159.126", 53429)))
+//                .cookieJar(cookieJar)
+//                .connectTimeout(20, TimeUnit.SECONDS)
+//                .proxyAuthenticator(proxyAuthenticator)
+//                .build();
+
     }
 
     public AppDatabase getDatabase() {
@@ -81,5 +91,29 @@ public class App extends Application {
 
     public Preferences getPreferences() {
         return preferences;
+    }
+
+    public void setClient(com.starostinvlad.fan.GsonModels.Proxy proxy) {
+        Authenticator proxyAuthenticator = (route, response) -> {
+            String credential = Credentials.basic("GiMvRf5na6", "xp9O9ViUkt");
+            return response.request().newBuilder()
+                    .header("Proxy-Authorization", credential)
+                    .build();
+        };
+        ClearableCookieJar cookieJar =
+                new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(getApplicationContext()));
+        okHttpClient = new OkHttpClient.Builder()
+                .proxy(new Proxy(Proxy.Type.HTTP,
+//                        new InetSocketAddress("45.138.159.126", 53429)))
+                        new InetSocketAddress(proxy.getIp(), proxy.getPort())))
+                .cookieJar(cookieJar)
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .proxyAuthenticator(proxyAuthenticator)
+                .build();
+        final Picasso picasso = new Picasso.Builder(getApplicationContext())
+                .downloader(new OkHttp3Downloader(okHttpClient))
+                .build();
+        picasso.setIndicatorsEnabled(true);
+        Picasso.setSingletonInstance(picasso);
     }
 }

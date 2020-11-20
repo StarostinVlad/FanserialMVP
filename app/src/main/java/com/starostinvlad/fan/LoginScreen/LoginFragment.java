@@ -16,8 +16,6 @@ import android.widget.ProgressBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.fan.R;
 
-import org.apache.commons.lang.StringUtils;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -105,7 +103,7 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
 
     private boolean isValidEmail() {
         String email = email_field.getText().toString();
-        return StringUtils.isNotEmpty(email);
+        return !email.isEmpty();
     }
 
     @Override
