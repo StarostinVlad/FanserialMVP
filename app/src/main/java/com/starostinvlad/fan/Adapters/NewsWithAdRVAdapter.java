@@ -29,37 +29,37 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public void setElements(List<Datum> elements) {
         this.elements = elements;
-        this.elements.add(8, null);
+//        this.elements.add(8, null);
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == 0) {
+//        if (viewType == 0) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_item, parent, false);
             return new ViewHolder(view);
-        } else {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_ad_item, parent, false);
-            return new AdViewHolder(view);
-        }
+//        } else {
+//            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_ad_item, parent, false);
+//            return new AdViewHolder(view);
+//        }
     }
 
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == 0) {
+//        if (getItemViewType(position) == 0) {
             ViewHolder viewHolder = (ViewHolder) holder;
             viewHolder.fill(elements.get(position));
-        } else {
-            // Span the item if active
-            final ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
-            StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) lp;
-            sglp.setFullSpan(true);
-            holder.itemView.setLayoutParams(sglp);
-            AdViewHolder viewHolder = (AdViewHolder) holder;
-            viewHolder.fill();
-        }
+//        } else {
+//            // Span the item if active
+//            final ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+//            StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) lp;
+//            sglp.setFullSpan(true);
+//            holder.itemView.setLayoutParams(sglp);
+//            AdViewHolder viewHolder = (AdViewHolder) holder;
+//            viewHolder.fill();
+//        }
 
     }
 
@@ -100,20 +100,6 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 Log.d(TAG, "click: " + datum.getEpisode().getName());
                 VideoActivity.start((Activity) itemView.getContext(), datum.getEpisode());
             });
-        }
-    }
-
-    class AdViewHolder extends RecyclerView.ViewHolder {
-        NativeAdViewNewsFeed nav_nf;
-
-        AdViewHolder(View itemView) {
-            super(itemView);
-            nav_nf = itemView.findViewById(R.id.native_ad_view_news_feed);
-
-        }
-
-        void fill() {
-            nav_nf.setNativeAd(Appodeal.getNativeAds(1).get(0));
         }
     }
 }

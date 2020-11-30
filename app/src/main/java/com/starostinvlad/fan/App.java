@@ -31,6 +31,7 @@ public class App extends Application {
     private AppDatabase database;
     private Preferences preferences;
     private String review = "";
+    private Picasso picasso;
 
     public static App getInstance() {
         return instance;
@@ -73,7 +74,6 @@ public class App extends Application {
 
         tokenSubject.onNext(preferences.getToken());
         tokenSubject.subscribe(token -> preferences.setToken(token)).isDisposed();
-
 //
 //        okHttpClient = new OkHttpClient.Builder()
 //                .proxy(new Proxy(Proxy.Type.HTTP,
@@ -110,10 +110,12 @@ public class App extends Application {
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .proxyAuthenticator(proxyAuthenticator)
                 .build();
-        final Picasso picasso = new Picasso.Builder(getApplicationContext())
-                .downloader(new OkHttp3Downloader(okHttpClient))
-                .build();
-        picasso.setIndicatorsEnabled(true);
-        Picasso.setSingletonInstance(picasso);
+        if (picasso == null) {
+            picasso = new Picasso.Builder(getApplicationContext())
+                    .downloader(new OkHttp3Downloader(okHttpClient))
+                    .build();
+            picasso.setIndicatorsEnabled(true);
+            Picasso.setSingletonInstance(picasso);
+        }
     }
 }

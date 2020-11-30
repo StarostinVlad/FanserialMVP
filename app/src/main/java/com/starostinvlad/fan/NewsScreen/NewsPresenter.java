@@ -54,7 +54,7 @@ class NewsPresenter {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((arr) -> {
-                                arr.add(8, null);
+//                                arr.add(8, null);
                                 newsModel.addToDatumList(arr);
                                 view.refreshListView();
                                 Log.d(TAG, "offset: " + (20 * page));

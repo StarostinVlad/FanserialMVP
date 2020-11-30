@@ -22,6 +22,13 @@
         android:padding="5dp">
 
         <EditText
+            android:id="@+id/name_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:hint="Имя" />
+
+        <EditText
             android:id="@+id/email_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -43,6 +50,14 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:text="Войти" />
+        <Button
+            android:layout_margin="20dp"
+            android:id="@+id/btn_registry"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:textColor="@android:color/holo_orange_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Регистрация" />
     </LinearLayout>
 
 </FrameLayout>

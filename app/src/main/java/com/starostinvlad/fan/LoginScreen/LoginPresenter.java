@@ -11,6 +11,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
@@ -85,6 +86,56 @@ class LoginPresenter {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    void registryApi(String email, String pass, String name) {
+        Observable.fromCallable(() -> registry(email, pass, name))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(response -> {
+                            if (!response.isEmpty()) {
+                                if (response.contains("success"))
+                                    loginApi(email, pass);
+                                else {
+                                    view.alarm(response);
+
+                                    view.showLoading(false);
+                                }
+                            }
+                        },
+                        e -> {
+                            Log.d(TAG, "message: " + e.toString());
+                            view.showLoading(false);
+                            view.alarm(e.getMessage());
+                            e.printStackTrace();
+                        }).isDisposed();
+    }
+
+    private String registry(String email, String pass, String name) {
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("password", pass)
+                .addFormDataPart("email", email)
+                .addFormDataPart("name", name)
+                .build();
+        Request getSeriaPage = new Request
+                .Builder()
+                .url(App.getInstance().getDomain() + "/registration/")
+                .post(requestBody)
+                .build();
+
+        try {
+            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
+            Log.d(TAG, "doc: " + response.body());
+            if (response.code() == 200 & response.body() != null) {
+                Log.d(TAG, "doc: " + response.body());
+                return response.body().string();
+            }
+            return response.message();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return e.getMessage();
         }
     }
 }

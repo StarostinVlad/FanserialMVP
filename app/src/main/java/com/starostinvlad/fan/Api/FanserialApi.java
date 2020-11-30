@@ -37,6 +37,9 @@ public interface FanserialApi {
     @POST("/api/v1/auth/social")
     Call<String> getToken(@Query("code") String code);
 
+//    @POST("/registration/")
+//    Observable<Response<Void>> registry(@Query("email") String email, @Query("password") String pass, @Query("name") String name);
+
     @POST("/api/v1/auth")
     Observable<Response<Token>> getToken(@Query("email") String email, @Query("password") String pass);
 

@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class SeasonRecyclerViewAdapter extends RecyclerView.Adapter<SeasonRecyclerViewAdapter.ViewHolder> {
 
-    String TAG = getClass().getSimpleName();
+    private String TAG = getClass().getSimpleName();
     private List<Episode> episodes;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;

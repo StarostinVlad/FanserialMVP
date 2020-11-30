@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.starostinvlad.fan.Adapters.AppodealWrapperAdapter;
 import com.starostinvlad.fan.Adapters.NewsWithAdRVAdapter;
 import com.starostinvlad.fan.GsonModels.Datum;
 import com.starostinvlad.fan.R;
@@ -70,7 +71,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(PORTRAIT_COUNT, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(staggeredGridLayoutManager);
         newsRecyclerViewAdapter = new NewsWithAdRVAdapter();
-        recyclerView.setAdapter(newsRecyclerViewAdapter);
+        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 8);
+        recyclerView.setAdapter(appodealWrapperAdapter);
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             staggeredGridLayoutManager.setSpanCount(LANDSCAPE_COUNT);

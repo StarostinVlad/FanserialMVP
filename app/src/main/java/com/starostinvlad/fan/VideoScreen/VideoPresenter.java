@@ -114,7 +114,7 @@ class VideoPresenter {
         view.checkViewed(viewed);
         //body > div.wrapper > main > div > div > div > div > div > div.page.page-serial-series.item-series > div > div > div.title-links-wrapper.clearfix > ul > li > a
 
-        if (!document.select(".subscribe-link").isEmpty()) {
+        if (!document.select(".subscribe-link > li > a").isEmpty()) {
             Element element = document.select(".subscribe-link > li > a").first();
             Log.d(TAG, "getPageAttrs: " + element.outerHtml());
             boolean subscribed = element.hasClass("active");

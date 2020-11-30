@@ -22,11 +22,12 @@ import androidx.fragment.app.Fragment;
 public class LoginFragment extends Fragment implements LoginFragmentContract {
 
     private final String TAG = getClass().getSimpleName();
-    private Button btn;
-    private EditText email_field, pass_field;
+    private Button regBtn, loginBtn;
+    private EditText emailField, passField, nameField;
     private ProgressBar progress;
     private LinearLayout loginContainer;
     private LoginPresenter presenter;
+    private boolean isRegistry = false;
 
 
     @Override
@@ -39,21 +40,32 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
-        btn = view.findViewById(R.id.btn_login);
-        email_field = view.findViewById(R.id.email_field);
-        pass_field = view.findViewById(R.id.password_field);
+        loginBtn = view.findViewById(R.id.btn_login);
+        regBtn = view.findViewById(R.id.btn_registry);
+        emailField = view.findViewById(R.id.email_field);
+        passField = view.findViewById(R.id.password_field);
+        nameField = view.findViewById(R.id.name_field);
         progress = view.findViewById(R.id.login_progress);
         loginContainer = view.findViewById(R.id.login_container);
         presenter = new LoginPresenter(this);
 
-        email_field.setText("mr.starostinvlad@gmail.com");
-        pass_field.setText("bcc34a");
-
         ProgressDialog progressDialog = new ProgressDialog(getContext());
         progressDialog.setMessage("Загрузка");
 
+        regBtn.setOnClickListener(v -> {
+            isRegistry = !isRegistry;
+            if (isRegistry) {
+                nameField.setVisibility(View.VISIBLE);
+                loginBtn.setText("Регистрация");
+                regBtn.setText("Войти");
+            } else {
+                nameField.setVisibility(View.GONE);
+                regBtn.setText("Регистрация");
+                loginBtn.setText("Войти");
+            }
+        });
 
-        email_field.addTextChangedListener(new TextWatcher() {
+        nameField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -61,7 +73,7 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                btn.setEnabled(isValidPass() && isValidEmail());
+                loginBtn.setEnabled(isValidPass() && isValidEmail() && isValidName());
             }
 
             @Override
@@ -69,7 +81,9 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
 
             }
         });
-        pass_field.addTextChangedListener(new TextWatcher() {
+
+
+        emailField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -77,7 +91,29 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                btn.setEnabled(isValidPass() && isValidEmail());
+                if (!isRegistry)
+                    loginBtn.setEnabled(isValidPass() && isValidEmail());
+                else
+                    loginBtn.setEnabled(isValidPass() && isValidEmail() && isValidName());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        passField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!isRegistry)
+                    loginBtn.setEnabled(isValidPass() && isValidEmail());
+                else
+                    loginBtn.setEnabled(isValidPass() && isValidEmail() && isValidName());
             }
 
             @Override
@@ -86,7 +122,16 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
             }
         });
 
-        btn.setOnClickListener(view1 -> presenter.loginApi(email_field.getText().toString(), pass_field.getText().toString()));
+        loginBtn.setOnClickListener(view1 -> {
+            if (isRegistry)
+                presenter.registryApi(emailField.getText().toString(),
+                        passField.getText().toString(),
+                        nameField.getText().toString()
+                );
+            else
+                presenter.loginApi(emailField.getText().toString(),
+                        passField.getText().toString());
+        });
         return view;
     }
 
@@ -96,18 +141,31 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
         loginContainer.setVisibility(!load ? View.VISIBLE : View.GONE);
     }
 
+    private boolean isValidName() {
+        String name = nameField.getText().toString();
+        return (name.length() > 4 && name.length() < 31);
+    }
+
+
     private boolean isValidPass() {
-        String pass = pass_field.getText().toString();
-        return (pass.length() > 5 && pass.length() < 31);
+        String pass = passField.getText().toString();
+        if (!isRegistry)
+            return (pass.length() > 5 && pass.length() < 31);
+        else
+            return (pass.length() > 8 && pass.length() < 31);
     }
 
     private boolean isValidEmail() {
-        String email = email_field.getText().toString();
+        String email = emailField.getText().toString();
         return !email.isEmpty();
     }
 
     @Override
     public void alarm(String message) {
+        if (message.contains("уже используется"))
+            message = "Данный E-mail уже используется!";
+        if (message.contains("Email адрес указан неверно"))
+            message = "Email адрес указан неверно!";
         if (message.contains("User not founded"))
             message = "Пользователь не найден!";
         if (message.contains("Bad email format!"))

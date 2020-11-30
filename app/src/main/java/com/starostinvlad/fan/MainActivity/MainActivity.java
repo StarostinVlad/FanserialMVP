@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.appodeal.ads.Appodeal;
+import com.appodeal.ads.Native;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.starostinvlad.fan.Adapters.SlidePagerAdapter;
 import com.starostinvlad.fan.App;
@@ -39,10 +40,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (BuildConfig.BUILD_TYPE.toLowerCase().equals("debug"))
-            Appodeal.setTesting(true);
-        Appodeal.initialize(this, "5b840848384e83385753354fd57248b212fbd0a454d85083", Appodeal.INTERSTITIAL | Appodeal.NATIVE, true);
 
 
         pager = findViewById(R.id.fragment_container_id);

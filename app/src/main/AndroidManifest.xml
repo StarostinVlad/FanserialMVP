@@ -3,29 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.starostinvlad.fan">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- optional -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- optional -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- optional -->
-    <uses-permission android:name="android.permission.VIBRATE" /> <!-- optional -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- partially optional -->
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
-    <uses-feature
-        android:name="android.hardware.touchscreen"
-        android:required="false" />
-    <uses-feature
-        android:name="android.software.leanback"
-        android:required="false" />
-
     <application
         android:name=".App"
         android:allowBackup="true"
-        android:banner="@android:mipmap/sym_def_app_icon"
-        android:icon="@drawable/icon"
+        android:banner="@drawable/banner"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/black"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
@@ -38,24 +22,6 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9409630953625719~5336580212" />
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-
-        <service
-            android:name=".FirebaseService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-                <action android:name="com.google.android.c2dm.permission.RECEIVE" />
-            </intent-filter>
-        </service>
 
         <activity
             android:name=".MainActivity.MainActivity"
@@ -72,7 +38,41 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity android:name=".SerialScreen.SerialActivity" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9409630953625719~5336580212" />
+        <service
+            android:name=".FirebaseService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.permission.RECEIVE" />
+            </intent-filter>
+        </service>
     </application>
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" /> <!-- optional -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- optional -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- optional -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- optional -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- partially optional -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
 </manifest>
