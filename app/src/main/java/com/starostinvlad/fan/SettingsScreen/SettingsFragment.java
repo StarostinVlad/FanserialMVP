@@ -59,14 +59,14 @@ public class SettingsFragment extends Fragment {
                     "add_photo_dialog_fragment");
         });
 
-        if (App.getInstance().getTokenSubject().getValue().isEmpty()) {
+        if (App.getInstance().getLoginSubject().getValue().isEmpty()) {
             disableLogout();
         } else {
             logout.setOnClickListener(v -> {
                 ClearableCookieJar cookieJar =
                         new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(getContext()));
                 cookieJar.clear();
-                App.getInstance().getTokenSubject().onNext("");
+                App.getInstance().getLoginSubject().onNext("");
                 disableLogout();
             });
         }

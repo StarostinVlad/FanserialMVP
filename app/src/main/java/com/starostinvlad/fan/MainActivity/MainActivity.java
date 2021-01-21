@@ -4,12 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.appodeal.ads.Appodeal;
-import com.appodeal.ads.Native;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.starostinvlad.fan.Adapters.SlidePagerAdapter;
 import com.starostinvlad.fan.App;
-import com.starostinvlad.fan.BuildConfig;
 import com.starostinvlad.fan.LoginScreen.LoginFragment;
 import com.starostinvlad.fan.NewsScreen.NewsFragment;
 import com.starostinvlad.fan.R;
@@ -45,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         pager = findViewById(R.id.fragment_container_id);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        App.getInstance().getTokenSubject().subscribe(token -> {
+        App.getInstance().getLoginSubject().subscribe(token -> {
                     Log.d(TAG, "onCreate: token: " + token);
                     fillFragments(token);
                     activeFragment(bottomNavigationView.getSelectedItemId(), 0);
@@ -97,11 +94,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
             case R.id.navigation_subscribtions:
                 setActiveFragment(2);
                 return true;
-            case R.id.navigation_next:
-                setActiveFragment(3);
-                return true;
             case R.id.navigation_settings:
-                setActiveFragment(4);
+                setActiveFragment(3);
                 return true;
         }
         return false;
@@ -114,15 +108,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         if (isEmpty(token)) {
             fragments.add(new SearchFragment());
             fragments.add(new LoginFragment());
-            fragments.add(new LoginFragment());
         } else {
-            NewsFragment newsFragment = new NewsFragment();
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(getString(R.string.subscriptions_extra), true);
-            newsFragment.setArguments(bundle);
 
             fragments.add(new SearchFragment());
-            fragments.add(newsFragment);
             fragments.add(new ViewedFragment());
         }
         fragments.add(new SettingsFragment());

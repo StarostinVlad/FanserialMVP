@@ -14,10 +14,6 @@
         android:icon="@drawable/ic_subscriptions"
         android:title="@string/subscribtions" />
     <item
-        android:id="@+id/navigation_next"
-        android:icon="@drawable/ic_queue_play_next"
-        android:title="@string/qeue_next" />
-    <item
         android:id="@+id/navigation_settings"
         android:icon="@drawable/exo_ic_settings"
         android:title="@string/settings" />

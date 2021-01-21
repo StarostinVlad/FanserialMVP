@@ -7,6 +7,7 @@ import android.app.UiModeManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,8 +24,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.appodeal.ads.Appodeal;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -34,13 +37,18 @@ import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.starostinvlad.fan.Adapters.PlayersAdapter;
+import com.starostinvlad.fan.Adapters.SubtitlesAdapter;
+import com.starostinvlad.fan.Adapters.TranslationsAdapter;
 import com.starostinvlad.fan.Adapters.SeasonRecyclerViewAdapter;
 import com.starostinvlad.fan.App;
 import com.starostinvlad.fan.GsonModels.Episode;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Hls;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Translation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,7 +61,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class VideoActivity extends AppCompatActivity implements VideoActivityContract {
     private final String TAG = getClass().getSimpleName();
-    int[] quality = {2097152, 1048576, 524288};
+    int[] quality = {414000, 714000, 1064000, 5055521};
 
     PlayerView playerView;
     Toolbar toolbar;
@@ -61,7 +69,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     View videoContainer;
     private Window window;
     private SimpleExoPlayer player;
-    private Episode episode;
+    private News episode;
     private VideoPresenter videoPresenter;
     private long currentPosition = 0;
     private boolean isInPictureInPictureMode;
@@ -72,9 +80,11 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     private String id = "";
     private Button nextBtn;
     private Button prevBtn;
+    private TextView descriptionTitle;
+    private ImageButton subtitlesBtn;
 
 
-    public static void start(Activity activity, Episode episode) {
+    public static void start(Activity activity, News episode) {
         Intent intent = new Intent(activity, VideoActivity.class);
         if (episode != null)
             intent.putExtra(activity.getString(R.string.episode_extra), episode);
@@ -90,13 +100,14 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         toolbar = findViewById(R.id.video_fragment_toolbar);
         progressBar = findViewById(R.id.video_progress_id);
         videoContainer = findViewById(R.id.video_container);
+        descriptionTitle = findViewById(R.id.episode_description);
 
         if (getIntent() != null && getIntent().hasExtra(getString(R.string.episode_extra)))
-            episode = (Episode) getIntent().getSerializableExtra(getString(R.string.episode_extra));
+            episode = (News) getIntent().getSerializableExtra(getString(R.string.episode_extra));
         else if (getIntent() != null && getIntent().hasExtra("NAME")) {
-            episode = new Episode();
-            episode.setName(getIntent().getStringExtra("NAME"));
-            episode.setUrl(getIntent().getStringExtra("HREF"));
+            episode = new News();
+            episode.setTitle(getIntent().getStringExtra("NAME"));
+            episode.setHref(getIntent().getStringExtra("HREF"));
         } else {
             showDialog(getString(R.string.video_error));
         }
@@ -111,7 +122,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         }
 
 
-        Log.d(TAG, "episode: " + episode.getName());
+        Log.d(TAG, "episode: " + episode.getSubTitle());
 
         trackSelector = new DefaultTrackSelector();
         DefaultTrackSelector.Parameters defaultTrackParam = trackSelector.buildUponParameters().build();
@@ -122,12 +133,16 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         playerView.hideController();
 
         playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS);
+        player = new SimpleExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
+        playerView.setPlayer(player);
 
 
         prevBtn = findViewById(R.id.episode_prev);
         nextBtn = findViewById(R.id.episode_next);
 
         ImageButton voices = findViewById(R.id.voice_btn);
+        subtitlesBtn = findViewById(R.id.btn_subtitle);
+        subtitlesBtn.setOnClickListener(view -> subtitleSelectorDialog());
 
         voices.setOnClickListener(view -> videoPresenter.buildDialog());
 
@@ -192,12 +207,12 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         videoPresenter = new VideoPresenter(this);
 
         if (App.getInstance().isReview()) {
+            playerView.hideController();
             showDialog(getString(R.string.on_review));
         } else {
             Appodeal.show(this, Appodeal.INTERSTITIAL);
-            videoPresenter.loadData(episode.getUrl());
+            videoPresenter.loadData(episode.getHref());
         }
-
     }
 
     @Override
@@ -209,11 +224,21 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
+    public void openTrailer(String iframe) {
+        iframe = iframe.startsWith("http") ? iframe : "http://" + iframe;
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(iframe));
+        startActivity(browserIntent);
+    }
+
+    @Override
+    public void changeDescription(String title, String title1) {
+        descriptionTitle.setText(title + " : " + title1);
+    }
+
+    @Override
     public void prevBtn(Episode episode) {
         prevBtn.setVisibility(View.VISIBLE);
         prevBtn.setOnClickListener(view -> {
-            videoPresenter.clearSeasonList();
-            videoPresenter.loadData(episode.getUrl());
             prevBtn.setVisibility(View.GONE);
         });
     }
@@ -222,8 +247,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     public void nextBtn(Episode episode) {
         nextBtn.setVisibility(View.VISIBLE);
         nextBtn.setOnClickListener(view -> {
-            videoPresenter.clearSeasonList();
-            videoPresenter.loadData(episode.getUrl());
             nextBtn.setVisibility(View.GONE);
         });
     }
@@ -239,17 +262,16 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void initRecycle(ArrayList<Episode> episodes) {
-        Log.d(TAG, "episodes: " + episodes);
+    public void initRecycle(Translation translation) {
         RecyclerView recyclerView = findViewById(R.id.rvAnimals);
         try {
             LinearLayoutManager horizontalLayoutManager
                     = new LinearLayoutManager(VideoActivity.this, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(horizontalLayoutManager);
-            SeasonRecyclerViewAdapter adapter = new SeasonRecyclerViewAdapter(this, episodes);
+            SeasonRecyclerViewAdapter adapter = new SeasonRecyclerViewAdapter(this, translation.getEpisodes());
             adapter.setClickListener((view, position) -> {
-                episode = episodes.get(position);
-                videoPresenter.loadData(episode.getUrl());
+                videoPresenter.setEpisode(position);
+                Appodeal.show(this, Appodeal.INTERSTITIAL);
             });
             recyclerView.setAdapter(adapter);
 //            Log.d(TAG, "episodes: " + episodes);
@@ -260,10 +282,10 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void voiceSelectorDialog(ArrayList<Player> players) {
-        PlayersAdapter adapter = new PlayersAdapter(players);
+    public void translationSelectorDialog(ArrayList<Translation> translations) {
+        TranslationsAdapter adapter = new TranslationsAdapter(translations);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
-                .setAdapter(adapter, (dialogInterface, i) -> videoPresenter.getVideo(i));
+                .setAdapter(adapter, (dialogInterface, i) -> videoPresenter.setTranslation(i));
         alertBuilder.show();
     }
 
@@ -272,7 +294,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.quality))
                 .setItems(R.array.quality_array, (dialog, which) -> {
-//                        videoPresenter.setQuality(which);
                     DefaultTrackSelector.Parameters
                             parameters = trackSelector.buildUponParameters()
                             .setMaxVideoBitrate(quality[which])
@@ -281,6 +302,22 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
                     trackSelector.setParameters(parameters);
                 });
         builder.show();
+    }
+
+    void subtitleSelectorDialog() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            SubtitlesAdapter adapter = new SubtitlesAdapter(player.getCurrentMediaItem().playbackProperties.subtitles);
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
+                    .setAdapter(adapter, (dialogInterface, i) -> {
+                        Log.d(TAG, "showSubtitleDialog: lang: " + adapter.getItem(i));
+                        DefaultTrackSelector.Parameters
+                                parameters = trackSelector.buildUponParameters()
+                                .setPreferredTextLanguage(adapter.getItem(i))
+                                .build();
+                        trackSelector.setParameters(parameters);
+                    });
+            alertBuilder.show();
+        }
     }
 
 
@@ -300,13 +337,10 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.video, menu);
-        MenuItem viewed_item = menu.findItem(R.id.viewed_checker);
         MenuItem subscribe_item = menu.findItem(R.id.subscribe_checker);
-        if (App.getInstance().getTokenSubject().getValue().isEmpty()) {
-            viewed_item.setEnabled(false);
+        if (App.getInstance().getLoginSubject().getValue().isEmpty()) {
             subscribe_item.setEnabled(false);
         } else {
-            viewed_item.setChecked(viewed);
             subscribe_item.setChecked(subscribed);
         }
         return super.onCreateOptionsMenu(menu);
@@ -334,18 +368,13 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
                 Log.i(TAG, "id " + item.getItemId());
                 share();
                 return true;
-            case R.id.viewed_checker:
-                item.setChecked(!item.isChecked());
-                videoPresenter.putToViewed(item.isChecked());
-                Log.d(TAG, String.format("item id: %d = %b", item.getItemId(), item.isChecked()));
-                return false;
             case R.id.subscribe_checker:
                 item.setChecked(!item.isChecked());
-                videoPresenter.putToSubscribe(id, item.isChecked());
+                videoPresenter.putToSubscribe(episode.getSiteId(), item.isChecked());
                 if (item.isChecked())
-                    FirebaseMessaging.getInstance().subscribeToTopic(id);
+                    FirebaseMessaging.getInstance().subscribeToTopic(episode.getSiteId());
                 else
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(id);
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic(episode.getSiteId());
                 Log.d(TAG, String.format("item id: %d = %b", item.getItemId(), item.isChecked()));
                 return false;
             case R.id.quality:
@@ -366,7 +395,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     private void share() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        String url = episode.getUrl().contains(App.getInstance().getDomain()) ? episode.getUrl() : App.getInstance().getDomain() + episode.getUrl();
+        String url = episode.getHref().contains(App.getInstance().getDomain()) ? episode.getHref() : App.getInstance().getDomain() + episode.getHref();
         sendIntent.putExtra(Intent.EXTRA_TEXT, String.format("Смотри сериал %s по ссылке %s", toolbar.getTitle().toString(), url));
         sendIntent.setType("text/plain");
 
@@ -383,19 +412,42 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void initPlayer(String uri) {
-        releasePlayer();
-        Log.d(TAG, "uri: " + uri);
+    public void initPlayer(Hls hls) {
+        if (player == null) {
+            player = new SimpleExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
+            playerView.setPlayer(player);
+        }
+        Log.d(TAG, "uri: " + hls.src);
+        List<MediaItem.Subtitle> subtitles = new ArrayList<>();
+        if (!hls.enSub.isEmpty() && !hls.enSub.equals("false")) {
+            Uri sub = Uri.parse(hls.enSub);
+            MediaItem.Subtitle subtitle = new MediaItem.Subtitle(sub, MimeTypes.TEXT_VTT, "en", Format.NO_VALUE);
+            subtitles.add(subtitle);
+        }
+        if (!hls.ruSub.isEmpty() && !hls.ruSub.equals("false")) {
+            Uri sub = Uri.parse(hls.ruSub);
+            MediaItem.Subtitle subtitle = new MediaItem.Subtitle(sub, MimeTypes.TEXT_VTT, "ru", Format.NO_VALUE);
+            subtitles.add(subtitle);
+        }
+        if (subtitles.isEmpty()) {
+            subtitlesBtn.setVisibility(View.GONE);
+        } else {
+            subtitlesBtn.setVisibility(View.VISIBLE);
+        }
         MediaItem mediaItem = new MediaItem.Builder()
-                .setUri(uri)
-                .setMimeType(MimeTypes.APPLICATION_M3U8)
+                .setUri(hls.src)
+                .setSubtitles(subtitles)
                 .build();
-        Log.d(TAG, "media item: " + mediaItem.mediaMetadata.title);
-        player = new SimpleExoPlayer.Builder(this).build();
-        player.addMediaItem(mediaItem);
-        playerView.setPlayer(player);
-        player.prepare();
-        player.seekTo(currentPosition);
+//        MediaItem mediaItem = MediaItem.fromUri(uri);
+        Log.d(TAG, "media item: " + mediaItem.playbackProperties.uri);
+//        player = new SimpleExoPlayer.Builder(this).build();
+        if (player != null) {
+            player.setMediaItem(mediaItem);
+            player.setForegroundMode(true);
+//        playerView.setPlayer(player);
+            player.prepare();
+            player.seekTo(currentPosition);
+        }
     }
 
     @Override
@@ -412,9 +464,8 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void checkSubscribed(String id, boolean subscribed) {
+    public void checkSubscribed(boolean subscribed) {
         this.subscribed = subscribed;
-        this.id = id;
         supportInvalidateOptionsMenu();
     }
 

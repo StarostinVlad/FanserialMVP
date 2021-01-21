@@ -128,12 +128,13 @@ public class AppodealWrapperAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onNativeLoaded() {
+        Log.d(TAG, "onNativeLoaded: native LOADED!");
         fillListWithAd();
     }
 
     @Override
     public void onNativeFailedToLoad() {
-
+        Log.d(TAG, "onNativeLoaded: native NOT LOADED!");
     }
 
     @Override
@@ -153,7 +154,7 @@ public class AppodealWrapperAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onNativeExpired() {
-
+        Log.d(TAG, "onNativeLoaded: native EXPIRED!");
     }
 
 

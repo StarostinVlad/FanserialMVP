@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.fan.Adapters.AppodealWrapperAdapter;
 import com.starostinvlad.fan.Adapters.NewsWithAdRVAdapter;
-import com.starostinvlad.fan.GsonModels.Datum;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 
 import java.util.List;
@@ -44,20 +44,18 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_news, container, false);
         initViews(view);
+        newsPresenter = new NewsPresenter(this);
 
-        if (getArguments() != null) {
-            boolean isSubscriptions = getArguments().getBoolean(getString(R.string.subscriptions_extra));
-            newsPresenter = new NewsPresenter(this, isSubscriptions);
-        } else
-            newsPresenter = new NewsPresenter(this);
-
-        recyclerView.setOnScrollChangeListener((view1, i, i1, i2, i3) -> {
-                    int viewId = staggeredGridLayoutManager.findFirstCompletelyVisibleItemPositions(null)[0];
-                    Log.d(TAG, String.format("onCreateView: last: %d", viewId));
-                    if (viewId >= newsRecyclerViewAdapter.getItemCount() * 0.75f)
-                        newsPresenter.addNews();
-                }
-        );
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int viewId = staggeredGridLayoutManager.findFirstCompletelyVisibleItemPositions(null)[0];
+                Log.d(TAG, String.format("onCreateView: last: %d", viewId));
+                if (viewId >= newsRecyclerViewAdapter.getItemCount() * 0.5f)
+                    newsPresenter.addNews();
+            }
+        });
 
         swipeRefreshLayout.setOnRefreshListener(newsPresenter::refreshNews);
 
@@ -71,7 +69,7 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(PORTRAIT_COUNT, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(staggeredGridLayoutManager);
         newsRecyclerViewAdapter = new NewsWithAdRVAdapter();
-        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 8);
+        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 4);
         recyclerView.setAdapter(appodealWrapperAdapter);
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -87,8 +85,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     }
 
     @Override
-    public void fillListView(List<Datum> datumList) {
-        newsRecyclerViewAdapter.setElements(datumList);
+    public void fillListView(List<News> newsList) {
+        newsRecyclerViewAdapter.setElements(newsList);
     }
 
     @Override

@@ -8,10 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.appodeal.ads.Appodeal;
-import com.appodeal.ads.native_ad.views.NativeAdViewNewsFeed;
 import com.squareup.picasso.Picasso;
-import com.starostinvlad.fan.GsonModels.Datum;
+import com.starostinvlad.fan.BlurTransformation;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
@@ -20,14 +19,13 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final String TAG = getClass().getSimpleName();
-    private List<Datum> elements = new ArrayList<>();
+    private List<News> elements = new ArrayList<>();
 
-    public void setElements(List<Datum> elements) {
+    public void setElements(List<News> elements) {
         this.elements = elements;
 //        this.elements.add(8, null);
         notifyDataSetChanged();
@@ -37,8 +35,8 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 //        if (viewType == 0) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_item, parent, false);
-            return new ViewHolder(view);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_item, parent, false);
+        return new ViewHolder(view);
 //        } else {
 //            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_ad_item, parent, false);
 //            return new AdViewHolder(view);
@@ -49,8 +47,8 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 //        if (getItemViewType(position) == 0) {
-            ViewHolder viewHolder = (ViewHolder) holder;
-            viewHolder.fill(elements.get(position));
+        ViewHolder viewHolder = (ViewHolder) holder;
+        viewHolder.fill(elements.get(position));
 //        } else {
 //            // Span the item if active
 //            final ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
@@ -90,15 +88,19 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             imageView = itemView.findViewById(R.id.image_item_id);
         }
 
-        void fill(Datum datum) {
-            title.setText(datum.getSerial().getName());
+        void fill(News news) {
+            title.setText(news.getTitle());
 
-            subTitle.setText(datum.getEpisode().getName());
+            subTitle.setText(news.getSubTitle());
 
-            Picasso.with(itemView.getContext()).load(datum.getEpisode().getImages().getMedium()).placeholder(R.color.cardview_dark_background).into(imageView);
+            Picasso.with(itemView.getContext())
+                    .load(news.getImage())
+                    .placeholder(R.color.cardview_dark_background)
+                    .transform(new BlurTransformation(itemView.getContext()))
+                    .into(imageView);
             itemView.setOnClickListener(view1 -> {
-                Log.d(TAG, "click: " + datum.getEpisode().getName());
-                VideoActivity.start((Activity) itemView.getContext(), datum.getEpisode());
+                Log.d(TAG, "click: " + news.getTitle());
+                VideoActivity.start((Activity) itemView.getContext(), news);
             });
         }
     }

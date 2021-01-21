@@ -8,16 +8,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-import com.starostinvlad.fan.GsonModels.Searched;
+import com.starostinvlad.fan.BlurTransformation;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 
 import java.util.List;
 
+
 public class SearchListAdapter extends BaseAdapter {
     private final String TAG = getClass().getSimpleName();
-    private List<Searched> list;
+    private List<News> list;
 
-    public SearchListAdapter(List<Searched> list) {
+    public SearchListAdapter(List<News> list) {
         this.list = list;
     }
 
@@ -43,14 +45,15 @@ public class SearchListAdapter extends BaseAdapter {
         }
 
         TextView header = view.findViewById(R.id.search_item_header);
-        header.setText(list.get(i).getName());
+        header.setText(list.get(i).getTitle());
 
         TextView description = view.findViewById(R.id.search_item_description);
-        description.setText(list.get(i).getDescription());
+        description.setText(list.get(i).getSubTitle());
 
         ImageView imageView = view.findViewById(R.id.search_item_poster);
         Picasso.with(viewGroup.getContext())
-                .load(list.get(i).getPoster().getMedium())
+                .load(list.get(i).getImage())
+                .transform(new BlurTransformation(viewGroup.getContext()))
                 .placeholder(R.color.cardview_dark_background)
                 .into(imageView);
 

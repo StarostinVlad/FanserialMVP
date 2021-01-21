@@ -43,6 +43,7 @@ public class FirebaseService extends FirebaseMessagingService {
             if (remoteMessage.getNotification().getImageUrl() != null)
                 bitmap = Picasso.with(this)
                         .load(remoteMessage.getNotification().getImageUrl())
+                        .transform(new BlurTransformation(this))
                         .placeholder(R.color.colorPrimary)
                         .get();
         } catch (IOException e) {

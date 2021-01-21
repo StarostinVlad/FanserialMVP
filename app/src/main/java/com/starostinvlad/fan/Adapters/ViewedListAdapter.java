@@ -1,6 +1,5 @@
 package com.starostinvlad.fan.Adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-import com.starostinvlad.fan.GsonModels.Datum;
-import com.starostinvlad.fan.GsonModels.Viewed;
+import com.starostinvlad.fan.BlurTransformation;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
@@ -20,9 +19,9 @@ import java.util.List;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ViewedListAdapter extends BaseAdapter {
-    private List<Viewed> viewedList;
+    private List<News> viewedList;
 
-    public ViewedListAdapter(List<Viewed> viewedList) {
+    public ViewedListAdapter(List<News> viewedList) {
         this.viewedList = viewedList;
     }
 
@@ -50,29 +49,22 @@ public class ViewedListAdapter extends BaseAdapter {
         TextView sub_title = view.findViewById(R.id.viewed_subtitle);
         ImageView poster = view.findViewById(R.id.viewed_poster);
         Button continue_btn = view.findViewById(R.id.viewed_continue);
-        Viewed viewed;
-        Datum cur_elem;
-        if ((viewed = viewedList.get(i)).getNext() == null) {
-            continue_btn.setBackgroundColor(Color.DKGRAY);
-            cur_elem = viewed.getCurrent();
-        } else {
-            continue_btn.setBackgroundColor(viewGroup.getContext().getColor(android.R.color.holo_orange_dark));
-            cur_elem = viewed.getNext();
-        }
+        News cur_elem;
+        continue_btn.setBackgroundColor(viewGroup.getContext().getColor(android.R.color.holo_orange_dark));
+        cur_elem = viewedList.get(i);
 
-        continue_btn.setText("Продолжить просмотр");
+        continue_btn.setText("Продолжить...");
 
         continue_btn.setOnClickListener(
-                view1 -> VideoActivity.start((AppCompatActivity) viewGroup.getContext(), cur_elem.getEpisode())
+                view1 -> VideoActivity.start((AppCompatActivity) viewGroup.getContext(), cur_elem)
         );
 
-        title.setText(cur_elem.getSerial().getName());
-        sub_title.setText(cur_elem.getEpisode().getName());
+        title.setText(cur_elem.getTitle());
+        sub_title.setText(cur_elem.getSubTitle());
 
         Picasso.with(viewGroup.getContext())
-                .load(
-                        cur_elem.getEpisode().getImages().getSmall()
-                )
+                .load(cur_elem.getImage())
+                .transform(new BlurTransformation(viewGroup.getContext()))
                 .placeholder(R.color.cardview_dark_background)
                 .into(poster);
 

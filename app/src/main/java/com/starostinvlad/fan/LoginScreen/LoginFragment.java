@@ -2,6 +2,8 @@ package com.starostinvlad.fan.LoginScreen;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,8 +14,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.starostinvlad.fan.App;
 import com.starostinvlad.fan.R;
 
 import androidx.annotation.Nullable;
@@ -53,16 +57,17 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
         progressDialog.setMessage("Загрузка");
 
         regBtn.setOnClickListener(v -> {
-            isRegistry = !isRegistry;
-            if (isRegistry) {
-                nameField.setVisibility(View.VISIBLE);
-                loginBtn.setText("Регистрация");
-                regBtn.setText("Войти");
-            } else {
-                nameField.setVisibility(View.GONE);
-                regBtn.setText("Регистрация");
-                loginBtn.setText("Войти");
-            }
+            openRegistry();
+//            isRegistry = !isRegistry;
+//            if (isRegistry) {
+//                nameField.setVisibility(View.VISIBLE);
+//                loginBtn.setText("Регистрация");
+//                regBtn.setText("Войти");
+//            } else {
+//                nameField.setVisibility(View.GONE);
+//                regBtn.setText("Регистрация");
+//                loginBtn.setText("Войти");
+//            }
         });
 
         nameField.addTextChangedListener(new TextWatcher() {
@@ -135,6 +140,11 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
         return view;
     }
 
+    private void openRegistry() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(App.getInstance().getDomain() + "/?do=register"));
+        startActivity(browserIntent);
+    }
+
     @Override
     public void showLoading(boolean load) {
         progress.setVisibility(load ? View.VISIBLE : View.GONE);
@@ -162,16 +172,8 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
 
     @Override
     public void alarm(String message) {
-        if (message.contains("уже используется"))
-            message = "Данный E-mail уже используется!";
-        if (message.contains("Email адрес указан неверно"))
-            message = "Email адрес указан неверно!";
-        if (message.contains("User not founded"))
-            message = "Пользователь не найден!";
-        if (message.contains("Bad email format!"))
-            message = "Неверный формат email!";
-        if (getView() != null)
-            Snackbar.make(getView(), message, Snackbar.LENGTH_SHORT).show();
+        if (getContext() != null)
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
 }

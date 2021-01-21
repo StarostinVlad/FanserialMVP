@@ -4,5 +4,6 @@
         <item>360</item>
         <item>480</item>
         <item>720</item>
+        <item>1080</item>
     </string-array>
 </resources>

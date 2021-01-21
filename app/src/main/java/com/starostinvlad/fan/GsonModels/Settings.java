@@ -15,7 +15,23 @@ public class Settings implements Serializable {
     private Proxy proxy;
     @SerializedName("review")
     @Expose
-    private String review;
+    private boolean review;
+
+    public boolean isReview() {
+        return review;
+    }
+
+    public int getLastVersion() {
+        return lastVersion;
+    }
+
+    public void setLastVersion(int lastVersion) {
+        this.lastVersion = lastVersion;
+    }
+
+    @SerializedName("last_version")
+    @Expose
+    private int lastVersion = 0;
 
     public String getDomain() {
         return domain;
@@ -33,11 +49,11 @@ public class Settings implements Serializable {
         this.proxy = proxy;
     }
 
-    public String getReview() {
+    public boolean getReview() {
         return review;
     }
 
-    public void setReview(String review) {
+    public void setReview(boolean review) {
         this.review = review;
     }
 

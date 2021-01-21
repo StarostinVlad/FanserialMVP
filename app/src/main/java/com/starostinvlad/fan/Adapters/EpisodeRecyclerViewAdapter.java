@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.starostinvlad.fan.App;
 import com.starostinvlad.fan.GsonModels.Episode;
 import com.starostinvlad.fan.R;
 
@@ -47,7 +48,11 @@ public class EpisodeRecyclerViewAdapter extends RecyclerView.Adapter<EpisodeRecy
         Log.d(TAG, "onBindViewHolder");
         Episode episode = episodes.get(position);
         holder.myTextView.setText(episode.getName());
-        Picasso.with(holder.imageView.getContext()).load(episode.getImages().getSmall()).placeholder(R.color.cardview_dark_background).into(holder.imageView);
+        Picasso.with(holder.itemView.getContext())
+                .load(episode.getImages().getSmall())
+                //.transform(App.getInstance().isReview() ? new BlurTransformation(holder.itemView.getContext()) : new CropSquareTransformation())
+                .placeholder(R.color.cardview_dark_background)
+                .into(holder.imageView);
     }
 
     // total number of rows

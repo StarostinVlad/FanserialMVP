@@ -11,9 +11,9 @@ import android.widget.SearchView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.fan.Adapters.SearchListAdapter;
-import com.starostinvlad.fan.GsonModels.Searched;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
-import com.starostinvlad.fan.SerialScreen.SerialActivity;
+import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
 import java.util.List;
 import java.util.Objects;
@@ -85,15 +85,15 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
     }
 
     @Override
-    public void fillList(List<Searched> arr) {
-        for (Searched searched : arr) {
-            Log.d(TAG, "restore: " + searched.getName());
+    public void fillList(List<News> arr) {
+        for (News searched : arr) {
+            Log.d(TAG, "restore: " + searched.getTitle());
         }
         listView.setAdapter(new SearchListAdapter(arr));
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
-            Log.d(TAG, arr.get(i).getName());
+            Log.d(TAG, arr.get(i).getTitle());
             searchFragmentPresenter.addInHistory(arr.get(i));
-            SerialActivity.start(getActivity(), arr.get(i));
+            VideoActivity.start(getActivity(), arr.get(i));
         });
     }
 

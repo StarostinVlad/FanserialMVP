@@ -84,9 +84,9 @@ public class SerialRecyclerViewAdapter extends RecyclerView.Adapter<SerialRecycl
 
     private EpisodeRecyclerViewAdapter getAdapter(Context context, List<Episode> episodes) {
         EpisodeRecyclerViewAdapter myRecyclerViewAdapter = new EpisodeRecyclerViewAdapter(context, episodes);
-        myRecyclerViewAdapter.setClickListener(
-                (view1, position) -> VideoActivity.start((Activity) context, episodes.get(position))
-        );
+//        myRecyclerViewAdapter.setClickListener(
+//                (view1, position) -> VideoActivity.start((Activity) context, episodes.get(position))
+//        );
         return myRecyclerViewAdapter;
     }
 

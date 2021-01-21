@@ -9,7 +9,7 @@ android {
         applicationId "com.starostinvlad.fan"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 15
+        versionCode 18
         versionName "2.0.1"
     }
     signingConfigs {

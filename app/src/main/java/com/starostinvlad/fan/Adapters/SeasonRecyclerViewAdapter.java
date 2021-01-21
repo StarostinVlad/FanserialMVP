@@ -7,10 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.starostinvlad.fan.GsonModels.Episode;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Episode;
 import com.starostinvlad.fan.R;
 
-import java.util.List;
+
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -19,12 +20,12 @@ import androidx.recyclerview.widget.RecyclerView;
 public class SeasonRecyclerViewAdapter extends RecyclerView.Adapter<SeasonRecyclerViewAdapter.ViewHolder> {
 
     private String TAG = getClass().getSimpleName();
-    private List<Episode> episodes;
+    private ArrayList<Episode> episodes;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public SeasonRecyclerViewAdapter(Context context, List<Episode> episodes) {
+    public SeasonRecyclerViewAdapter(Context context, ArrayList<Episode> episodes) {
         this.mInflater = LayoutInflater.from(context);
         this.episodes = episodes;
         Log.d(TAG, "initialize");
@@ -43,14 +44,15 @@ public class SeasonRecyclerViewAdapter extends RecyclerView.Adapter<SeasonRecycl
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Log.d(TAG, "onBindViewHolder");
-        Episode episode = episodes.get(position);
-        holder.myTextView.setText(episode.getName());
+        holder.myTextView.setText(episodes.get(position).getTitle());
     }
 
     // total number of rows
     @Override
     public int getItemCount() {
-        return episodes.size();
+        if (episodes != null)
+            return episodes.size();
+        return 0;
     }
 
     // stores and recycles views as they are scrolled off screen

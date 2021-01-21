@@ -2,9 +2,7 @@ package com.starostinvlad.fan.LoginScreen;
 
 import android.util.Log;
 
-import com.starostinvlad.fan.Api.NetworkService;
 import com.starostinvlad.fan.App;
-import com.starostinvlad.fan.GsonModels.Token;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -30,30 +28,19 @@ class LoginPresenter {
 
     void loginApi(String email, String pass) {
         view.showLoading(true);
-        NetworkService
-                .getInstance()
-                .getApi()
-                .getToken(email, pass)
-                .observeOn(Schedulers.io())
-                .doOnNext(val -> login(email, pass))
-                .subscribeOn(AndroidSchedulers.mainThread())
+        Observable.fromCallable(() -> login(email, pass))
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe(
-                        response -> {
-                            if (response.isSuccessful()) {
-                                Token token = response.body();
-                                App.getInstance().getTokenSubject().onNext(token.getToken());
-                                Log.d(TAG, "token: " + token.getToken());
+                        document -> {
+                            String login = document.select("#login-box").attr("title");
+                            if (!login.equals("Авторизация")) {
+                                App.getInstance().getLoginSubject().onNext(login);
+                                Log.d(TAG, "login: " + login);
                             } else {
-                                try {
-                                    if (response.errorBody() != null) {
-                                        String error = response.errorBody().string();
-                                        Log.d(TAG, "error: " + error);
-                                        view.alarm(error);
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                                String errors = document.selectFirst(".berrors").text();
+                                Log.d(TAG, "loginApi: errors: " + errors);
+                                view.alarm(errors);
                             }
                             view.showLoading(false);
                         },
@@ -66,27 +53,30 @@ class LoginPresenter {
                 ).isDisposed();
     }
 
-    private void login(String email, String pass) {
+    private Document login(String email, String pass) {
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("password", pass)
-                .addFormDataPart("email", email)
+                .addFormDataPart("login_password", pass)
+                .addFormDataPart("login_name", email)
+                .addFormDataPart("login", "submit")
                 .build();
-        Request getSeriaPage = new Request
+        Request loginRequest = new Request
                 .Builder()
-                .url(App.getInstance().getDomain() + "/authorization/")
+                .url(App.getInstance().getDomain())
                 .post(requestBody)
                 .build();
 
         try {
-            Response response = App.getInstance().getOkHttpClient().newCall(getSeriaPage).execute();
+            Response response = App.getInstance().getOkHttpClient().newCall(loginRequest).execute();
             if (response.code() == 200 & response.body() != null) {
                 Document doc = Jsoup.parse(response.body().string());
                 Log.d(TAG, "doc: " + doc.body());
+                return doc;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     void registryApi(String email, String pass, String name) {

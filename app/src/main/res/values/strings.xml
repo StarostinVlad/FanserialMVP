@@ -14,7 +14,7 @@
     <string name="subscribe">Подписаться</string>
     <string name="logout">Выйти из аккаунта</string>
     <string name="video_error">Что-то пошло не так. Мы уже знаем об проблеме и ищем решение.</string>
-    <string name="episode_extra">episode</string>
+    <string name="episode_extra">episodeJS</string>
     <string name="subscriptions_extra">subscriptions</string>
     <string name="donat">Поддержать разаработчика</string>
     <string name="private_policy_title">Политика конфиденциальности</string>
@@ -61,5 +61,5 @@
         <strong>почту:&nbsp;</strong><a href="mailto:mr.starostinvlad@gmail.com">mr.starostinvlad@gmail.com</a>&nbsp;<br>Вы получите ответ в течение суток с момента получения письма.</p>
         </body></html>
         ]]></string>
-    <string name="on_review">Данный сериал недоступен в вашей стране</string>
+    <string name="on_review">Контент недоступен</string>
 </resources>

@@ -33,4 +33,5 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:visibility="gone" />
+
 </FrameLayout>

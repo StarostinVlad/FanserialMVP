@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import com.starostinvlad.fan.Adapters.SerialRecyclerViewAdapter;
 import com.starostinvlad.fan.GsonModels.Searched;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class SerialActivity extends AppCompatActivity implements SerialActivityC
     RecyclerView listView;
     Toolbar toolbar;
 
-    public static void start(Activity context, Searched url) {
+    public static void start(Activity context, News url) {
         Intent intent = new Intent(context, SerialActivity.class);
         intent.putExtra("url", url);
         context.startActivity(intent);

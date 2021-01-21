@@ -15,6 +15,7 @@ public class NetworkService {
 
         RxJava2CallAdapterFactory rxAdapter = RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io());
 
+
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(App.getInstance().getDomain())
                 .client(App.getInstance().getOkHttpClient())

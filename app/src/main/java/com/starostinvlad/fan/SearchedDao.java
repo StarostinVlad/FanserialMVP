@@ -1,6 +1,6 @@
 package com.starostinvlad.fan;
 
-import com.starostinvlad.fan.GsonModels.Searched;
+import com.starostinvlad.fan.GsonModels.News;
 
 import java.util.List;
 
@@ -16,25 +16,25 @@ import io.reactivex.Observable;
 @Dao
 public interface SearchedDao {
 
-    @Query("SELECT * FROM searched")
-    Observable<List<Searched>> getAll();
+    @Query("SELECT * FROM news")
+    Observable<List<News>> getAll();
 
-    @Query("SELECT * FROM searched WHERE id = :id")
-    Searched getById(long id);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    Maybe<List<Long>> insert(List<Searched> searched);
+    @Query("SELECT * FROM news WHERE id = :id")
+    News getById(long id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    Maybe<Long> insert(Searched searched);
+    Maybe<List<Long>> insert(List<News> searched);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    Maybe<Long> insert(News searched);
 
     @Update
-    void update(Searched searched);
+    void update(News searched);
 
     @Update
-    void update(List<Searched> searched);
+    void update(List<News> searched);
 
     @Delete
-    void delete(Searched searched);
+    void delete(News searched);
 
 }

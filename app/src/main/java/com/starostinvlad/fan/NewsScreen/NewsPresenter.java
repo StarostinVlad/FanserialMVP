@@ -1,11 +1,5 @@
 package com.starostinvlad.fan.NewsScreen;
 
-import android.util.Log;
-
-import com.starostinvlad.fan.Api.NetworkService;
-import com.starostinvlad.fan.App;
-import com.starostinvlad.fan.GsonModels.News;
-
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -16,18 +10,11 @@ class NewsPresenter {
 
     private final String TAG = getClass().getSimpleName();
     private NewsFragmentContract view;
-    private int page = 1;
     private NewsModel newsModel;
     private boolean loading = false;
-    private boolean subscriptions = false;
 
     NewsPresenter(NewsFragmentContract view) {
         this.view = view;
-    }
-
-    NewsPresenter(NewsFragmentContract view, boolean subscriptions) {
-        this.view = view;
-        this.subscriptions = subscriptions;
     }
 
     void refreshNews() {
@@ -36,29 +23,14 @@ class NewsPresenter {
     }
 
     void addNews() {
-        Log.d(TAG, "offset: " + (20 * page) + " addnews");
         if (!loading) {
-            Log.d(TAG, "offset: " + (20 * page) + " addnews loading");
             startLoading();
-            Observable<News> var = subscriptions ?
-                    NetworkService
-                            .getInstance()
-                            .getApi()
-                            .addSubscritions(App.getInstance().getTokenSubject().getValue(), 20 * page)
-                    : NetworkService
-                    .getInstance()
-                    .getApi()
-                    .addNews(20 * page);
-
-            var.map(News::getData)
+            Observable
+                    .fromCallable(newsModel::addNews)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((arr) -> {
-//                                arr.add(8, null);
-                                newsModel.addToDatumList(arr);
                                 view.refreshListView();
-                                Log.d(TAG, "offset: " + (20 * page));
-                                page++;
                                 endLoading();
                             }, (exception) -> {
                                 exception.printStackTrace();
@@ -68,38 +40,18 @@ class NewsPresenter {
         }
     }
 
-    void loadNews2() {
-        if (newsModel == null) {
-            newsModel = new NewsModel();
-            Log.d(TAG, "subscribe to list");
-            newsModel.episodeListSub().subscribe(view::fillListView).isDisposed();
-        }
-    }
-
     void loadNews() {
         if (!loading) {
             startLoading();
             if (newsModel == null) {
                 newsModel = new NewsModel();
-                page = 1;
-                Observable<News> var = subscriptions ?
-                        NetworkService
-                                .getInstance()
-                                .getApi()
-                                .getSubscriptions(App.getInstance().getTokenSubject().getValue())
-                        :
-                        NetworkService
-                                .getInstance()
-                                .getApi()
-                                .getNews();
-
-                var.map(News::getData)
+                Observable
+                        .fromCallable(newsModel::loadNews)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .retryWhen(throwableObservable -> throwableObservable.take(3).delay(1, TimeUnit.SECONDS))
                         .subscribe((arr) -> {
                             newsModel.setEpisodeList(arr);
-//                            employeeDao.insert(arr);
                             view.fillListView(arr);
                             endLoading();
                         }, (exception) -> {

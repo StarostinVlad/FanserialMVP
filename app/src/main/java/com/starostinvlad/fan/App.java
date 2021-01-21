@@ -8,11 +8,8 @@ import com.franmontiel.persistentcookiejar.ClearableCookieJar;
 import com.franmontiel.persistentcookiejar.PersistentCookieJar;
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
-import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 
 import androidx.room.Room;
@@ -25,13 +22,19 @@ public class App extends Application {
 
     private static App instance;
     private final String TAG = getClass().getSimpleName();
-    private BehaviorSubject<String> tokenSubject = BehaviorSubject.createDefault("");
+    private BehaviorSubject<String> loginSubject = BehaviorSubject.createDefault("");
     private OkHttpClient okHttpClient;
-    private String domain = "https://fanserial.net";
+    private String domain = "https://hdseria.tv";
     private AppDatabase database;
     private Preferences preferences;
-    private String review = "";
+    private boolean review;
     private Picasso picasso;
+
+    public void setLastVersion(int lastVersion) {
+        this.lastVersion = lastVersion;
+    }
+
+    private int lastVersion = 0;
 
     public static App getInstance() {
         return instance;
@@ -39,15 +42,15 @@ public class App extends Application {
 
     public boolean isReview() {
         Log.d(TAG, "isReview: " + review);
-        return Build.PRODUCT.matches(".*_?sdk_?.*") || review.equals(BuildConfig.VERSION_NAME);
+        return Build.PRODUCT.matches(".*_?sdk_?.*") || (review && lastVersion == BuildConfig.VERSION_CODE);
     }
 
-    public void setReview(String review) {
+    public void setReview(boolean review) {
         this.review = review;
     }
 
-    public BehaviorSubject<String> getTokenSubject() {
-        return tokenSubject;
+    public BehaviorSubject<String> getLoginSubject() {
+        return loginSubject;
     }
 
     public String getDomain() {
@@ -72,8 +75,8 @@ public class App extends Application {
                 .build();
         preferences = new Preferences(getApplicationContext());
 
-        tokenSubject.onNext(preferences.getToken());
-        tokenSubject.subscribe(token -> preferences.setToken(token)).isDisposed();
+        loginSubject.onNext(preferences.getToken());
+        loginSubject.subscribe(token -> preferences.setToken(token)).isDisposed();
 //
 //        okHttpClient = new OkHttpClient.Builder()
 //                .proxy(new Proxy(Proxy.Type.HTTP,
@@ -103,18 +106,20 @@ public class App extends Application {
         ClearableCookieJar cookieJar =
                 new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(getApplicationContext()));
         okHttpClient = new OkHttpClient.Builder()
-                .proxy(new Proxy(Proxy.Type.HTTP,
-//                        new InetSocketAddress("45.138.159.126", 53429)))
-                        new InetSocketAddress(proxy.getIp(), proxy.getPort())))
+//                .proxy(new Proxy(Proxy.Type.HTTP,
+////                        new InetSocketAddress("45.138.159.126", 53429)))
+//                        new InetSocketAddress(proxy.getIp(), proxy.getPort())))
                 .cookieJar(cookieJar)
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .proxyAuthenticator(proxyAuthenticator)
                 .build();
         if (picasso == null) {
             picasso = new Picasso.Builder(getApplicationContext())
-                    .downloader(new OkHttp3Downloader(okHttpClient))
+//                .downloader(new OkHttp3Downloader(okHttpClient))
+//                .loggingEnabled(true)
+                    .indicatorsEnabled(true)
                     .build();
-            picasso.setIndicatorsEnabled(true);
+
             Picasso.setSingletonInstance(picasso);
         }
     }

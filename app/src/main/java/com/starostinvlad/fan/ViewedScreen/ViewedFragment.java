@@ -9,6 +9,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.starostinvlad.fan.Adapters.ViewedListAdapter;
+import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.GsonModels.Viewed;
 import com.starostinvlad.fan.R;
 
@@ -35,6 +36,7 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(container.getContext()).inflate(R.layout.fragment_viewed, container, false);
+
         listView = view.findViewById(R.id.next_episode_listview);
         listView.setItemsCanFocus(true);
         progressBar = view.findViewById(R.id.progress_viewed_list);
@@ -44,7 +46,7 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
 
         presenter = new ViewedPresenter(this);
 
-        presenter.updateSubcribtions();
+//        presenter.updateSubcribtions();
 
         presenter.loadData();
 
@@ -52,7 +54,7 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
     }
 
     @Override
-    public void fillList(List<Viewed> viewedList) {
+    public void fillList(List<News> viewedList) {
         ViewedListAdapter viewedListAdapter = new ViewedListAdapter(viewedList);
         listView.setAdapter(viewedListAdapter);
     }
