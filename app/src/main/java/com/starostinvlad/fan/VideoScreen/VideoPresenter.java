@@ -1,5 +1,6 @@
 package com.starostinvlad.fan.VideoScreen;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -7,7 +8,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.starostinvlad.fan.App;
-import com.starostinvlad.fan.VideoScreen.PlayerModel.Episode;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Hls;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.PlayerDataDeserializer;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SecondPlayerDataDeserializer;
@@ -57,10 +57,11 @@ class VideoPresenter {
             if (inputData != null && !inputData.text().isEmpty()) {
 //                Log.d(TAG, "getHlsUrl: inputData: " + inputData.text());
                 int id = Integer.parseInt(inputData.attr("data-playlist"));
+
                 Gson gson = new GsonBuilder()
                         .setPrettyPrinting()
                         .setLenient()
-                        .registerTypeAdapter(Serial.class, new SecondPlayerDataDeserializer(id))
+                        .registerTypeAdapter(Serial.class, new SecondPlayerDataDeserializer(id, Uri.parse(url)))
                         .create();
                 serial = gson.fromJson(inputData.text(), Serial.class);
                 return serial;
@@ -69,7 +70,7 @@ class VideoPresenter {
         return null;
     }
 
-    private Serial getSerial(Document doc) throws IOException {
+    private Serial getSerial(Document doc) {
 
         String playerJson = doc.select("script:nth-child(3)").html();
         Pattern pattern = Pattern.compile("init\\((.*?)\\);");
@@ -94,15 +95,6 @@ class VideoPresenter {
     private Hls getHlsObject(String iframe) throws IOException {
         iframe = iframe.replace("ifr::", "https:");
         Log.d(TAG, "getHlsUrl: iframe: " + iframe);
-        if (iframe.contains("youtube")) {
-            view.openTrailer(iframe);
-            return null;
-        }
-        if (iframe.contains("list")) {
-            Log.e(TAG, "getSerial: url " + iframe);
-            iframe = iframe.startsWith("https") ? iframe : "http:" + iframe;
-            getSerialFromSecondPlayer(iframe);
-        }
         Request getSeriaPage = new Request.Builder()
                 .addHeader("referer", referer)
                 .url(iframe)
@@ -175,7 +167,7 @@ class VideoPresenter {
                 .subscribe(serial ->
                         {
                             this.serial = serial;
-                            view.translationSelectorDialog(serial.getTranslations());
+//                            view.translationSelectorDialog(serial.getTranslations());
                             view.showLoading(false);
                             onStart();
                         }
@@ -188,17 +180,43 @@ class VideoPresenter {
 
     private void getVideo(int index) {
         Log.d(TAG, "getVideo: " + serial.getCurrentEpisode());
-        Observable.fromCallable(() -> getHlsObject(
-                serial.getCurrentTranslation()
-                        .getEpisodes()
-                        .get(index)
-                        .getUrl()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(view::initPlayer, throwable -> {
-                    sendErrorMsg(throwable.getMessage());
-                    throwable.printStackTrace();
-                }).isDisposed();
+        String iframeUrl = serial.getCurrentTranslation().getEpisodes().get(index).getUrl().replace("ifr::", "https:");
+        Log.d(TAG, "getVideo: iframe= " + iframeUrl);
+        if (iframeUrl.contains("youtube")) {
+            view.openTrailer(iframeUrl);
+        }
+        if (iframeUrl.contains("list") || iframeUrl.contains("/pl/")) {
+            Log.e(TAG, "getSerial: url " + iframeUrl);
+            iframeUrl = iframeUrl.startsWith("https") ? iframeUrl : "http:" + iframeUrl;
+            String finalIframeUrl = iframeUrl;
+            Observable
+                    .fromCallable(() -> getSerialFromSecondPlayer(finalIframeUrl))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(serial ->
+                            {
+                                this.serial = serial;
+                                view.translationSelectorDialog(serial.getTranslations());
+                                view.showLoading(false);
+                                onStart();
+                            }
+                            ,
+                            (exception) -> {
+                                exception.printStackTrace();
+                                sendErrorMsg(exception.getMessage());
+                            }).isDisposed();
+        } else
+            Observable.fromCallable(() -> getHlsObject(
+                    serial.getCurrentTranslation()
+                            .getEpisodes()
+                            .get(index)
+                            .getUrl()))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(view::initPlayer, throwable -> {
+                        sendErrorMsg(throwable.getMessage());
+                        throwable.printStackTrace();
+                    }).isDisposed();
     }
 
 
