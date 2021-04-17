@@ -24,8 +24,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class NewsFragment extends Fragment implements NewsFragmentContract {
 
-    final int LANDSCAPE_COUNT = 4;
-    final int PORTRAIT_COUNT = 2;
+    final int LANDSCAPE_COUNT = 2;
+    final int PORTRAIT_COUNT = 1;
     private NewsPresenter newsPresenter;
     private String TAG = getClass().getSimpleName();
     private RecyclerView recyclerView;
@@ -69,7 +69,7 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(PORTRAIT_COUNT, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(staggeredGridLayoutManager);
         newsRecyclerViewAdapter = new NewsWithAdRVAdapter();
-        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 4);
+        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 12);
         recyclerView.setAdapter(appodealWrapperAdapter);
         int orientation = this.getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {

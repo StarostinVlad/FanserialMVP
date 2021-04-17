@@ -16,6 +16,8 @@ import java.util.Map.Entry;
 public class PlayerDataDeserializer implements JsonDeserializer<Serial> {
     private final String TAG = getClass().getSimpleName();
 
+    // TODO: 12.04.2021 распределить работу на методы
+
     @Override
     public Serial deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         Log.d(TAG, "deserialize: start");
@@ -46,7 +48,7 @@ public class PlayerDataDeserializer implements JsonDeserializer<Serial> {
                 String episodeTitle = episodeObject.get("sname").getAsString();
                 Integer number = episodeObject.get("lssort").getAsInt();
                 Integer type = episodeObject.get("codetype").getAsInt();
-                String url = episodeObject.get("scode_begin").getAsString();
+                String url = episodeObject.get("scode_begin").getAsString().replace("ifr::", "https:");
 
                 episode.setId(episodeId);
                 episode.setParent(parent);

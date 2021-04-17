@@ -224,9 +224,8 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void openTrailer(String iframe) {
-        iframe = iframe.startsWith("http") ? iframe : "http://" + iframe;
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(iframe));
+    public void openTrailer(String url) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browserIntent);
     }
 
@@ -502,6 +501,12 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         if (Util.SDK_INT > 23) {
             releasePlayer();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        videoPresenter.onDetach();
     }
 
     @Override

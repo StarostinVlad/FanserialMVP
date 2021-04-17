@@ -10,16 +10,10 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 19
-        versionName "2.0.1"
+        versionName "2.0.3"
     }
     signingConfigs {
         release {
-            storeFile file('..\\keystore_fserials.jks')
-            storePassword 'Jisus131097'
-            keyAlias = 'fs_key'
-            keyPassword 'Fuckit97'
-        }
-        debug {
             storeFile file('..\\keystore_fserials.jks')
             storePassword 'Jisus131097'
             keyAlias = 'fs_key'
@@ -35,7 +29,7 @@ android {
         }
         debug {
             shrinkResources false
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
         }

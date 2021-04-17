@@ -31,7 +31,7 @@ public interface VideoActivityContract {
 
     void showDialog(String msg);
 
-    void openTrailer(String iframe);
+    void openTrailer(String url);
 
     void changeDescription(String title, String title1);
 }

@@ -35,7 +35,7 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 //        if (viewType == 0) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_list_item, parent, false);
         return new ViewHolder(view);
 //        } else {
 //            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_ad_item, parent, false);
@@ -63,7 +63,10 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemViewType(int position) {
-        return elements.get(position) != null ? 0 : 1;
+        if (position < getItemCount())
+            return elements.get(position) != null ? 0 : 1;
+        else
+            return getItemCount();
     }
 
     @Override
@@ -83,9 +86,9 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         ViewHolder(View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.title_item_id);
-            subTitle = itemView.findViewById(R.id.subtitle_item_id);
-            imageView = itemView.findViewById(R.id.image_item_id);
+            title = itemView.findViewById(R.id.search_item_header);
+            subTitle = itemView.findViewById(R.id.search_item_description);
+            imageView = itemView.findViewById(R.id.search_item_poster);
         }
 
         void fill(News news) {
