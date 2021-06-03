@@ -24,8 +24,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class NewsFragment extends Fragment implements NewsFragmentContract {
 
-    final int LANDSCAPE_COUNT = 2;
-    final int PORTRAIT_COUNT = 1;
+    final int LANDSCAPE_COUNT = 4;
+    final int PORTRAIT_COUNT = 2;
     private NewsPresenter newsPresenter;
     private String TAG = getClass().getSimpleName();
     private RecyclerView recyclerView;

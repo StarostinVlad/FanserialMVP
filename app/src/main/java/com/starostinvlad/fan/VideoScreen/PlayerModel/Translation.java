@@ -1,33 +1,41 @@
 package com.starostinvlad.fan.VideoScreen.PlayerModel;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import android.annotation.SuppressLint;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-public class Translation {
+import androidx.annotation.NonNull;
+
+public class Translation implements Serializable {
 
     private Integer id;
     private String title;
-    private Integer season;
-    private ArrayList<Episode> episodes;
+    private String url;
+    private int code;
 
-    public Integer getSeason() {
-        return season;
+    public String getUrl() {
+        return url;
     }
 
-    public void setSeason(Integer season) {
-        this.season = season;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public ArrayList<Episode> getEpisodes() {
-        return episodes;
+    public int getCode() {
+        return code;
     }
 
-    public void setEpisodes(ArrayList<Episode> episodes) {
-        this.episodes = episodes;
+    public void setCode(int code) {
+        this.code = code;
     }
+
+    @SuppressLint("DefaultLocale")
+    @NonNull
+    @Override
+    public String toString() {
+        return String.format("{ %d) %s = %s (%d)}", code, title, url, id);
+    }
+
 
     public Integer getId() {
         return id;

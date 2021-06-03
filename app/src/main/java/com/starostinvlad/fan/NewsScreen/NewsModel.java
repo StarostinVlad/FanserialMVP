@@ -77,7 +77,8 @@ public class NewsModel {
             List<News> newsList = new ArrayList<>();
             for (Element element : elements) {
                 String title = element.select("a.short-title").text();
-                String subTitle = element.select("div.short-text > div.short-desc > div.sd-line2").text();
+                Elements subTitleElements = element.select("div.short-text > div.short-desc > div.sd-line2");
+                String subTitle = subTitleElements.size() == 4 ? subTitleElements.get(1).text() : subTitleElements.get(2).text();
                 String image = App.getInstance().getDomain() + element.select("div.short-img.img-box > img").attr("src");
                 String href = element.select("div.short-text > a").attr("href");
                 String siteId = href.substring(href.lastIndexOf("/"));

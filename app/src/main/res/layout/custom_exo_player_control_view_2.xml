@@ -4,38 +4,6 @@
     android:layout_height="match_parent"
     android:background="@color/exo_black_opacity_30">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <FrameLayout
-            android:id="@+id/exo_rew"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#00000000"
-            android:clickable="true"
-            android:focusable="false"
-            android:foreground="?attr/selectableItemBackground" />
-
-        <FrameLayout
-            android:id="@+id/exo_ffwd"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#00000000"
-            android:clickable="true"
-            android:focusable="false"
-            android:foreground="?attr/selectableItemBackground" />
-    </LinearLayout>
-
-
-    <FrameLayout
-        android:id="@+id/blockator"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <Button
         android:id="@+id/episode_next"
         android:layout_width="50dp"
@@ -90,18 +58,13 @@
         android:layout_gravity="bottom"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/episode_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@+id/btn_subtitle"
+                android:visibility="gone"
                 android:src="@drawable/ic_closed_caption"
                 android:background="@android:color/transparent"
                 android:layout_width="wrap_content"
@@ -145,15 +108,24 @@
                 android:background="@drawable/ic_voice"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:nextFocusDown="@+id/rvAnimals" />
+                android:nextFocusDown="@+id/episodeListRV" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvAnimals"
+        <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
+            tools:listitem="@layout/episodes_in_videoscreen_item"
+            android:id="@+id/episodeListRV"
             android:layout_width="match_parent"
             android:layout_height="80dp" />
     </LinearLayout>
-
+    <Button
+        android:id="@+id/exo_rew"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+    <Button
+        android:id="@+id/exo_ffwd"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        />
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/video_fragment_toolbar"
         android:layout_width="match_parent"

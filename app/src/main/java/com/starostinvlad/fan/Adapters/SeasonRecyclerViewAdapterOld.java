@@ -34,7 +34,7 @@ public class SeasonRecyclerViewAdapterOld extends RecyclerView.Adapter<SeasonRec
     @Override
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.recyclerview_item, parent, false);
+        View view = mInflater.inflate(R.layout.episodes_in_videoscreen_item, parent, false);
         Log.d(TAG, "createViewHolder");
         return new ViewHolder(view);
     }

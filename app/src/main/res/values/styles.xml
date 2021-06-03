@@ -1,11 +1,16 @@
 <resources>
 
     <!-- Base application theme. -->
+
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@android:color/holo_orange_dark</item>
+    </style>
+    <style name="SplashTheme" parent="AppTheme.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:background">@drawable/splash_background</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

@@ -1,6 +1,8 @@
 package com.starostinvlad.fan.VideoScreen.PlayerModel;
 
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -11,10 +13,17 @@ import com.google.gson.JsonParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
@@ -24,13 +33,44 @@ import okhttp3.Response;
 
 public class SerialPlayer {
     private final String TAG = getClass().getSimpleName();
-    private String referer;
+    private String referer = "https://seriahd.tv";
     private String hash;
 
-    private String DOMAIN;
+    private String DOMAIN = "";
     private OkHttpClient CLIENT;
-    private String playerHost;
-    private String title;
+    private String playerHost = "";
+    private String title = "";
+
+    public List<String> getInfoList() {
+        return infoList;
+    }
+
+    public void setInfoList(List<String> infoList) {
+        this.infoList = infoList;
+    }
+
+    private List<String> infoList = new ArrayList<>();
+
+    public List<String> getReleaseDates() {
+        return releaseDates;
+    }
+
+    public void setReleaseDates(List<String> releaseDates) {
+        this.releaseDates = releaseDates;
+    }
+
+    private List<String> releaseDates = new ArrayList<>();
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    private String description = "";
 
     public String getTitle() {
         return title;
@@ -59,6 +99,8 @@ public class SerialPlayer {
         return Maybe.create(emitter -> {
             try {
                 Document document = loadHlsFromUrl(url);
+                Log.d(TAG, "getHlsObject: url: " + url);
+                Log.d(TAG, "getHlsObject: doc: " + document);
                 if (url.contains("responce.php")) {
                     emitter.onSuccess(parseHlsFromSecondPlayerPage(document));
                 } else {
@@ -129,8 +171,28 @@ public class SerialPlayer {
             try {
                 Document document = loadSerialPageFromUrl(url);
                 hash = document.getElementsByAttributeValue("name", "user_hash").attr("value");
+
                 title = document.getElementsByAttributeValue("property", "og:title").attr("content");
+
                 Log.d(TAG, "title: " + title);
+
+                List<TextNode> descriptionNodes = document.selectFirst("div.fdesc.full-text.clearfix").textNodes();
+                for (TextNode descriptionNode : descriptionNodes.subList(2, descriptionNodes.size())) {
+                    description += descriptionNode.text();
+                }
+                Log.d(TAG, "description: " + description);
+                Elements serialInfoElements = document.select("div.sd-line");
+                for (Element serialInfoElement : serialInfoElements) {
+                    infoList.add(serialInfoElement.text());
+                }
+                Log.d(TAG, "serialInfo: " + infoList.toString());
+
+                Elements releaseDateElements = document.select("tr.epscape_tr");
+                for (Element date : releaseDateElements) {
+                    releaseDates.add(date.text());
+                }
+                Log.d(TAG, "releaseDates: " + releaseDates.toString());
+
                 subscribed = document.select(".fa.fa-star").hasClass("fav-added");
 //                \"scode_begin\":\"([^}]*?dew.*?)\"}
                 Pattern pattern = Pattern.compile("\"scode_begin\":\"([^}]*?dew.*?)\"");
@@ -142,9 +204,12 @@ public class SerialPlayer {
                     result = result.replace("ifr:", "http").replace("\\", "");
                     Log.d(TAG, "getSerial: EXIST SECOND PLAYER! " + result);
                     serial = parseSerialFromSecondPlayer(getSecondPlayerPageFromUrl(result));
-                } else
+                    emitter.onNext(serial);
+                } else {
                     serial = parseSerialFromDefautPlayer(document);
-                emitter.onNext(serial);
+                    emitter.onNext(serial);
+//                    throw new Exception("Данный сериал не поддерживается в приложении!");
+                }
             } catch (Exception e) {
                 emitter.onError(e);
             } finally {
@@ -197,6 +262,18 @@ public class SerialPlayer {
         if (matcher.find()) {
             String result = matcher.group(1);
             result = "[" + result + "]";
+
+            String path = Environment.getExternalStorageDirectory() + "/player.json";
+            Log.d(TAG, "parseSerialFromDefautPlayer: path: " + path);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(path)) {
+                byte[] arr = result.getBytes();
+                fileOutputStream.write(arr);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                Log.d(TAG, "deserialize: file writed!");
+            }
+
             Log.d(TAG, "getPlayerList: " + result.substring(result.length() - 50));
             Gson gson = new GsonBuilder()
                     .setPrettyPrinting()

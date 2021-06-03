@@ -12,6 +12,7 @@ import com.squareup.picasso.Picasso;
 import com.starostinvlad.fan.BlurTransformation;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
 import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
 import java.util.List;
@@ -56,7 +57,7 @@ public class ViewedListAdapter extends BaseAdapter {
         continue_btn.setText("Продолжить...");
 
         continue_btn.setOnClickListener(
-                view1 -> VideoActivity.start((AppCompatActivity) viewGroup.getContext(), cur_elem)
+                view1 -> SerialPageScreenActivity.start((AppCompatActivity) viewGroup.getContext(), cur_elem)
         );
 
         title.setText(cur_elem.getTitle());

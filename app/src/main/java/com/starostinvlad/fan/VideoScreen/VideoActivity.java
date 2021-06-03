@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -36,15 +35,16 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.starostinvlad.fan.Adapters.SubtitlesAdapter;
 import com.starostinvlad.fan.Adapters.TranslationsAdapter;
 import com.starostinvlad.fan.Adapters.SeasonRecyclerViewAdapter;
 import com.starostinvlad.fan.App;
-import com.starostinvlad.fan.GsonModels.Episode;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Episode;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Hls;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Season;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Translation;
 
 import java.util.ArrayList;
@@ -55,6 +55,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -69,7 +70,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     View videoContainer;
     private Window window;
     private SimpleExoPlayer player;
-    private News episode;
     private VideoPresenter videoPresenter;
     private long currentPosition = 0;
     private boolean isInPictureInPictureMode;
@@ -78,16 +78,17 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     private boolean viewed;
     private boolean subscribed;
     private String id = "";
-    private Button nextBtn;
-    private Button prevBtn;
-    private TextView descriptionTitle;
+    private Button exo_rew;
+    private Button exo_ffwd;
     private ImageButton subtitlesBtn;
+    private boolean doubleTap;
+    private View doubleClickArea;
 
 
-    public static void start(Activity activity, News episode) {
+    public static void start(Activity activity, Serial serial) {
         Intent intent = new Intent(activity, VideoActivity.class);
-        if (episode != null)
-            intent.putExtra(activity.getString(R.string.episode_extra), episode);
+        if (serial != null)
+            intent.putExtra("SERIAL", serial);
         activity.startActivity(intent);
     }
 
@@ -100,17 +101,18 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         toolbar = findViewById(R.id.video_fragment_toolbar);
         progressBar = findViewById(R.id.video_progress_id);
         videoContainer = findViewById(R.id.video_container);
-        descriptionTitle = findViewById(R.id.episode_description);
 
-        if (getIntent() != null && getIntent().hasExtra(getString(R.string.episode_extra)))
-            episode = (News) getIntent().getSerializableExtra(getString(R.string.episode_extra));
-        else if (getIntent() != null && getIntent().hasExtra("NAME")) {
-            episode = new News();
-            episode.setTitle(getIntent().getStringExtra("NAME"));
-            episode.setHref(getIntent().getStringExtra("HREF"));
-        } else {
-            showDialog(getString(R.string.video_error));
-        }
+        mDetector = new GestureDetectorCompat(this, new MyGestureListener());
+
+//        if (getIntent() != null && getIntent().hasExtra(getString(R.string.episode_extra)))
+//            episode = (News) getIntent().getSerializableExtra(getString(R.string.episode_extra));
+//        else if (getIntent() != null && getIntent().hasExtra("NAME")) {
+//            episode = new News();
+//            episode.setTitle(getIntent().getStringExtra("NAME"));
+//            episode.setHref(getIntent().getStringExtra("HREF"));
+//        } else {
+//            showDialog(getString(R.string.video_error));
+//        }
 
         window = this.getWindow();
         uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
@@ -122,7 +124,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         }
 
 
-        Log.d(TAG, "episode: " + episode.getSubTitle());
+//        Log.d(TAG, "episode: " + episode.getSubTitle());
 
         trackSelector = new DefaultTrackSelector();
         DefaultTrackSelector.Parameters defaultTrackParam = trackSelector.buildUponParameters().build();
@@ -136,82 +138,27 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
         player = new SimpleExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
         playerView.setPlayer(player);
 
-
-        prevBtn = findViewById(R.id.episode_prev);
-        nextBtn = findViewById(R.id.episode_next);
+        exo_ffwd = findViewById(R.id.exo_ffwd);
+        exo_rew = findViewById(R.id.exo_rew);
 
         ImageButton voices = findViewById(R.id.voice_btn);
         subtitlesBtn = findViewById(R.id.btn_subtitle);
         subtitlesBtn.setOnClickListener(view -> subtitleSelectorDialog());
 
-        voices.setOnClickListener(view -> videoPresenter.buildDialog());
+        voices.setOnClickListener(view -> videoPresenter.onBuildDialog());
 
-
-        FrameLayout right_area = findViewById(R.id.exo_ffwd);
-        FrameLayout left_area = findViewById(R.id.exo_rew);
-        FrameLayout blockator = findViewById(R.id.blockator);
-
-        if (uiModeManager.getCurrentModeType() != Configuration.UI_MODE_TYPE_TELEVISION)
-            blockator.setOnTouchListener(new View.OnTouchListener() {
-                boolean doubletap;
-                private View view;
-                private GestureDetector gestureDetector = new GestureDetector(VideoActivity.this, new GestureDetector.SimpleOnGestureListener() {
-
-                    @Override
-                    public boolean onDoubleTapEvent(MotionEvent event) {
-                        Log.d("TEST", "Raw event: " + event.getAction() + ", (" + event.getRawX() + ", " + event.getRawY() + ")");
-                        if (event.getRawX() > view.getWidth() / 2.0) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                left_area.performContextClick(event.getRawX(), event.getRawY());
-                            }
-                        } else {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                right_area.performContextClick(event.getRawX(), event.getRawY());
-                            }
-                        }
-                        doubletap = true;
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        Log.d("TEST", "onSingleTapConfirmed event: " + e.getAction());
-                        if (playerView.isControllerVisible()) {
-                            playerView.hideController();
-                            hideSystemsElements();
-                        } else
-                            playerView.showController();
-                        return super.onSingleTapConfirmed(e);
-                    }
-
-                    @Override
-                    public boolean onSingleTapUp(MotionEvent e) {
-                        Log.d("TEST", "SingTapUp event: " + e.getAction());
-                        return super.onSingleTapUp(e);
-                    }
-                });
-
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    view = v;
-                    Log.d("TEST", " event: " + event.getAction() + " double: " + doubletap);
-                    gestureDetector.onTouchEvent(event);
-                    if (doubletap) {
-                        doubletap = false;
-                        return false;
-                    }
-                    return true;
-                }
-            });
+        doubleClickArea = findViewById(R.id.doubleClickArea);
 
         videoPresenter = new VideoPresenter(this);
 
-        if (App.getInstance().isReview()) {
+        if (getIntent() != null && getIntent().hasExtra("SERIAL")) {
+            videoPresenter.onStartWithSerial((Serial) getIntent().getSerializableExtra("SERIAL"));
+        } else if (App.getInstance().isReview()) {
             playerView.hideController();
             showDialog(getString(R.string.on_review));
         } else {
             Appodeal.show(this, Appodeal.INTERSTITIAL);
-            videoPresenter.loadData(episode.getHref());
+//            videoPresenter.loadData(episode.getHref());
         }
     }
 
@@ -230,24 +177,10 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void changeDescription(String title, String title1) {
-        descriptionTitle.setText(title + " : " + title1);
-    }
-
-    @Override
-    public void prevBtn(Episode episode) {
-        prevBtn.setVisibility(View.VISIBLE);
-        prevBtn.setOnClickListener(view -> {
-            prevBtn.setVisibility(View.GONE);
-        });
-    }
-
-    @Override
-    public void nextBtn(Episode episode) {
-        nextBtn.setVisibility(View.VISIBLE);
-        nextBtn.setOnClickListener(view -> {
-            nextBtn.setVisibility(View.GONE);
-        });
+    public void changeDescription(String title, String subTitle) {
+        toolbar.setTitle(title);
+        toolbar.setSubtitle(subTitle);
+        setSupportActionBar(toolbar);
     }
 
     @Override
@@ -261,19 +194,19 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void initRecycle(Translation translation) {
-        RecyclerView recyclerView = findViewById(R.id.rvAnimals);
+    public void initRecycle(List<Episode> episodes) {
+        RecyclerView recyclerView = findViewById(R.id.episodeListRV);
         try {
             LinearLayoutManager horizontalLayoutManager
                     = new LinearLayoutManager(VideoActivity.this, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(horizontalLayoutManager);
-            SeasonRecyclerViewAdapter adapter = new SeasonRecyclerViewAdapter(this, translation.getEpisodes());
+            SeasonRecyclerViewAdapter adapter = new SeasonRecyclerViewAdapter(this, episodes);
             adapter.setClickListener((view, position) -> {
-                videoPresenter.setEpisode(position);
+                videoPresenter.onChangeEpisode(position);
                 Appodeal.show(this, Appodeal.INTERSTITIAL);
             });
             recyclerView.setAdapter(adapter);
-//            Log.d(TAG, "episodes: " + episodes);
+            Log.d(TAG, "episodes: " + episodes);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -281,10 +214,10 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     }
 
     @Override
-    public void translationSelectorDialog(ArrayList<Translation> translations) {
+    public void translationSelectorDialog(List<Translation> translations) {
         TranslationsAdapter adapter = new TranslationsAdapter(translations);
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
-                .setAdapter(adapter, (dialogInterface, i) -> videoPresenter.setTranslation(i));
+                .setAdapter(adapter, (dialogInterface, i) -> videoPresenter.onChangeTranslation(i));
         alertBuilder.show();
     }
 
@@ -336,12 +269,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.video, menu);
-        MenuItem subscribe_item = menu.findItem(R.id.subscribe_checker);
-        if (App.getInstance().getLoginSubject().getValue().isEmpty()) {
-            subscribe_item.setEnabled(false);
-        } else {
-            subscribe_item.setChecked(subscribed);
-        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -363,19 +290,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
                 }
                 Log.i(TAG, "id " + item.getItemId());
                 return true;
-            case R.id.share_video:
-                Log.i(TAG, "id " + item.getItemId());
-                share();
-                return true;
-            case R.id.subscribe_checker:
-                item.setChecked(!item.isChecked());
-                videoPresenter.putToSubscribe(episode.getSiteId(), item.isChecked());
-                if (item.isChecked())
-                    FirebaseMessaging.getInstance().subscribeToTopic(episode.getSiteId());
-                else
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(episode.getSiteId());
-                Log.d(TAG, String.format("item id: %d = %b", item.getItemId(), item.isChecked()));
-                return false;
+
             case R.id.quality:
                 qualitySelectorDialog();
                 Log.i(TAG, "id " + item.getItemId());
@@ -389,17 +304,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
                 return true;
         }
         return false;
-    }
-
-    private void share() {
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        String url = episode.getHref().contains(App.getInstance().getDomain()) ? episode.getHref() : App.getInstance().getDomain() + episode.getHref();
-        sendIntent.putExtra(Intent.EXTRA_TEXT, String.format("Смотри сериал %s по ссылке %s", toolbar.getTitle().toString(), url));
-        sendIntent.setType("text/plain");
-
-        Intent shareIntent = Intent.createChooser(sendIntent, null);
-        startActivity(shareIntent);
     }
 
     @Override
@@ -456,18 +360,6 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
                 .show();
     }
 
-    @Override
-    public void checkViewed(boolean viewed) {
-        this.viewed = viewed;
-        supportInvalidateOptionsMenu();
-    }
-
-    @Override
-    public void checkSubscribed(boolean subscribed) {
-        this.subscribed = subscribed;
-        supportInvalidateOptionsMenu();
-    }
-
     private void releasePlayer() {
         if (player != null) {
             player.release();
@@ -520,5 +412,55 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     public void fillToolbar(String title) {
         toolbar.setTitle(title);
         setSupportActionBar(toolbar);
+    }
+
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        Log.d(TAG, "dispatchTouchEvent: dispatch touch");
+        if (uiModeManager.getCurrentModeType() != Configuration.UI_MODE_TYPE_TELEVISION)
+            this.mDetector.onTouchEvent(event);
+        Log.d(TAG, "dispatchTouchEvent: doubleTap 1:" + doubleTap);
+        if (!doubleTap) {
+            hideSystemsElements();
+            return playerView.dispatchTouchEvent(event);
+        }
+        doubleTap = false;
+//        else
+//            return mDetector.onTouchEvent(event);
+//            return true;
+
+        return super.dispatchTouchEvent(event);
+    }
+
+    GestureDetectorCompat mDetector;
+
+    class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private static final String DEBUG_TAG = "Gestures";
+
+        @Override
+        public boolean onDown(MotionEvent event) {
+            Log.d(DEBUG_TAG, "onDown: " + event.toString());
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            doubleTap = true;
+            return super.onDoubleTapEvent(e);
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            Log.d(DEBUG_TAG, "onDoubleTapEvent: tap " + event.getRawX() + " : " + playerView.getWidth() / 2.0);
+            doubleTap = false;
+            doubleClickArea.performClick();
+            if (event.getRawX() > playerView.getWidth() / 2.0) {
+                exo_ffwd.performClick();
+            } else {
+                exo_rew.performClick();
+            }
+            return super.onDoubleTap(event);
+        }
     }
 }

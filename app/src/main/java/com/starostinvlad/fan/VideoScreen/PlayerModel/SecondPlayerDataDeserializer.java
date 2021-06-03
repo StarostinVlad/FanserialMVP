@@ -13,15 +13,16 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 public class SecondPlayerDataDeserializer implements JsonDeserializer<Serial> {
     private final String TAG = getClass().getSimpleName();
     private final String host;
     private int playerId;
-    private HashMap<String, ArrayList<Episode>> translationMap;
+    private int seasonNumber = 0;
 
-    public SecondPlayerDataDeserializer(int id, String host) {
+    SecondPlayerDataDeserializer(int id, String host) {
         this.playerId = id;
         this.host = host;
     }
@@ -30,81 +31,97 @@ public class SecondPlayerDataDeserializer implements JsonDeserializer<Serial> {
 
     @Override
     public Serial deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        Log.d(TAG, "deserialize2: start");
+//        Log.d(TAG, "deserialize2: start");
         Serial serial = new Serial();
-        ArrayList<Translation> translations = new ArrayList<>();
         JsonObject jsonObject = json.getAsJsonObject();
-        Log.d(TAG, "deserialize2: " + jsonObject.keySet().toString());
-        translationMap = new HashMap<>();
-        for (Entry<String, JsonElement> jsonTranslation : jsonObject.entrySet()) {
+//        Log.d(TAG, "deserialize2: " + jsonObject.keySet().toString());
+        List<Season> seasons = new ArrayList<>();
+        for (Entry<String, JsonElement> jsonSeason : jsonObject.entrySet()) {
+            seasonNumber = Integer.parseInt(jsonSeason.getKey());
+            List<Episode> episodes = new ArrayList<>();
+            if (jsonSeason.getValue().isJsonObject()) {
+                JsonObject seasonObject = jsonSeason.getValue().getAsJsonObject();
 
-            Integer season = Integer.parseInt(jsonTranslation.getKey());
-            Log.d(TAG, "season: " + jsonTranslation.getKey());
-
-            if (jsonTranslation.getValue().isJsonObject()) {
-                JsonObject translationObject = jsonTranslation.getValue().getAsJsonObject();
-
-                for (Entry<String, JsonElement> episodeTranslation : translationObject.entrySet()) {
-                    Log.d(TAG, "deserialize: episode: " + episodeTranslation.getKey());
-                    int episodeNumber = Integer.parseInt(episodeTranslation.getKey());
-                    JsonObject episodeObject = episodeTranslation.getValue().getAsJsonObject();
-                    parseEpisode(episodeObject, season, episodeNumber);
+                for (Entry<String, JsonElement> jsonEpisode : seasonObject.entrySet()) {
+                    int episodeNumber = Integer.parseInt(jsonEpisode.getKey());
+                    JsonObject episodeObject = jsonEpisode.getValue().getAsJsonObject();
+                    episodes.add(
+                            createEpisode(episodeNumber, episodeObject)
+                    );
                 }
             } else {
-                JsonArray translationArray = jsonTranslation.getValue().getAsJsonArray();
+                JsonArray episodeJsonArray = jsonSeason.getValue().getAsJsonArray();
                 int episodeNumber = 0;
-                Log.d(TAG, "deserialize: episode: " + episodeNumber);
-                for (JsonElement element : translationArray) {
-                    parseEpisode(element.getAsJsonObject(), season, episodeNumber);
+//                Log.d(TAG, "deserialize: episode: " + episodeNumber);
+                for (JsonElement episodeJsonElement : episodeJsonArray) {
+                    episodes.add(
+                            createEpisode(episodeNumber, episodeJsonElement.getAsJsonObject())
+                    );
                     episodeNumber++;
                 }
             }
+            Season season = new Season();
+            season.setNumber(seasonNumber);
+            season.setEpisodes(episodes);
+
+            seasons.add(season);
         }
-        for (Entry<String, ArrayList<Episode>> listEntry : translationMap.entrySet()) {
-            Translation translation = new Translation();
-            translation.setTitle(listEntry.getKey());
-            translation.setEpisodes(listEntry.getValue());
-            translations.add(translation);
-        }
-        Log.d(TAG, "deserialize: hash: " + translationMap);
-        serial.setTranslations(translations);
-        Log.d(TAG, "deserialize: end! tsize: " + translations.size());
+        serial.setSeasonList(seasons);
+//        Log.d(TAG, "deserialize: end! tsize: " + translations.size());
         return serial;
     }
 
     @SuppressLint("DefaultLocale")
-    void parseEpisode(JsonObject episodeObject, int season, int episodeNumber) {
+    private Episode createEpisode(int episodeNumber, JsonObject jsonObject) {
+        Episode episode = new Episode();
+        episode.setNumber(episodeNumber);
+        episode.setTitle(
+                String
+                        .format(
+                                "%d сезон %s серия",
+                                seasonNumber,
+                                (episodeNumber != 0 ? episodeNumber : "спецвыпуск")
+                        )
+        );
+        episode.setTranslations(
+                parseTranslations(
+                        jsonObject,
+                        seasonNumber,
+                        episodeNumber
+                )
+        );
+        return episode;
+    }
+
+    @SuppressLint("DefaultLocale")
+    private List<Translation> parseTranslations(JsonObject episodeObject, int season, int episodeNumber) {
+        List<Translation> translations = new ArrayList<>();
+        Log.d(TAG, "parseTranslations: jsonOBject: " + episodeObject.toString());
         for (Entry<String, JsonElement> elementEntry : episodeObject.entrySet()) {
+            Translation translation = new Translation();
 
             String[] voiceString = elementEntry.getKey().split("#");
-            Integer voiceID = Integer.parseInt(voiceString[0]);
+            int translationCode = Integer.parseInt(voiceString[0]);
             String voiceTitle = voiceString[1];
-
-            Integer uniqueId = elementEntry.getValue().getAsInt();
-
+            int uniqueId = elementEntry.getValue().getAsInt();
+            //https://sorb.info/dew/3949?season=1&episode=1&voice=1&alloff=true
+            //"https://%s/player/responce.php?id=%d&season=%d&episode=%d&voice=%d&uniqueid=%d",
             String url = String.format(
+//                    "https://%s/dew/%d?season=%d&episode=%d&voice=%d&alloff=true&uniqueid=%d",
                     "https://%s/player/responce.php?id=%d&season=%d&episode=%d&voice=%d&uniqueid=%d",
                     host,
                     playerId,
                     season,
                     episodeNumber,
-                    voiceID,
+                    translationCode,
                     uniqueId
             );
-
-            Episode episode = new Episode();
-            episode.setNumber(episodeNumber);
-            episode.setTitle(String.format("сезон: %d серия: %s", season, (episodeNumber != 0 ? episodeNumber : "спецвыпуск")));
-            episode.setType(110);
-            episode.setUrl(url);
-            if (translationMap.containsKey(voiceTitle))
-                translationMap.get(voiceTitle).add(episode);
-            else {
-                ArrayList<Episode> episodes = new ArrayList<>();
-                episodes.add(episode);
-                translationMap.put(voiceTitle, episodes);
-            }
-            Log.d(TAG, "deserialize: url: " + url + " " + voiceTitle);
+            translation.setTitle(voiceTitle);
+            translation.setId(uniqueId);
+            translation.setCode(translationCode);
+            translation.setUrl(url);
+            translations.add(translation);
         }
+        return translations;
     }
 }

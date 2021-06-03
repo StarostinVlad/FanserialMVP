@@ -12,11 +12,12 @@ import com.starostinvlad.fan.VideoScreen.Player;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Translation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TranslationsAdapter extends BaseAdapter {
-    ArrayList<Translation> translations;
+    List<Translation> translations;
 
-    public TranslationsAdapter(ArrayList<Translation> translations) {
+    public TranslationsAdapter(List<Translation> translations) {
         this.translations = translations;
     }
 

@@ -3,6 +3,7 @@ package com.starostinvlad.fan.VideoScreen;
 import android.util.Log;
 
 import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Season;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 
@@ -26,85 +27,27 @@ class VideoPresenter {
         disposables.dispose();
     }
 
-
-    void loadData(String url) {
-        view.showLoading(true);
-
-        disposables.add(
-                serialPlayer
-                        .getSerial(url)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(serial -> {
-                            this.serial = serial;
-                            view.translationSelectorDialog(serial.getTranslations());
-
-//                            onStart();
-
-                            view.fillToolbar(serialPlayer.getTitle());
-                            view.checkSubscribed(serialPlayer.isSubscribed());
-
-                            Log.d(TAG, "loadData: serial: " + serial);
-                            view.showLoading(false);
-                        }, Throwable::printStackTrace)
-        );
-
-//        Observable.fromCallable(() -> loadPage(url))
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .doOnNext(this::getPageAttrs)
-//                .observeOn(Schedulers.io())
-//                .map(this::getSerial)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(serial ->
-//                        {
-//                            this.serial = serial;
-//                            view.translationSelectorDialog(serial.getTranslations());
-//                            view.showLoading(false);
-//                            onStart();
-//                        }
-//                        ,
-//                        (exception) -> {
-//                            exception.printStackTrace();
-//                            sendErrorMsg(exception.getMessage());
-//                        }).isDisposed();
+    void onStartWithSerial(Serial serial) {
+        this.serial = serial;
+        view.initRecycle(serial.getCurrentSeason().getEpisodes());
+        Log.d(TAG, "loadData: serial: " + serial);
+        view.showLoading(false);
     }
 
-    private void changeVideoSource(int index) {
-        Log.d(TAG, "getVideo: " + serial.getCurrentEpisode());
-        String url = serial.getCurrentTranslation()
-                .getEpisodes()
-                .get(index)
+    private void changeVideoSource() {
+//        Log.d(TAG, "getVideo: " + serial.getCurrentEpisodeIndex());
+        String url = serial
+                .getCurrentSeason()
+                .getEpisode(serial.getCurrentEpisodeIndex())
+                .getTranslation(serial.getCurrentTranslationIndex())
                 .getUrl();
         if (url.contains("youtube")) {
             url = url.startsWith("http") ? url : "http://" + url;
             view.openTrailer(url);
-//        } else if (url.contains("/dew/")) {
-//            Log.e(TAG, "getSerial: url " + url);
-//            url = url.startsWith("https") ? url : "http:" + url;
-//            disposables.add(
-//                    serialModel
-//                            .getSerialFromSecondPlayer(url)
-//                            .subscribeOn(Schedulers.io())
-//                            .observeOn(AndroidSchedulers.mainThread())
-//                            .subscribe(serial -> {
-//                                        this.serial = serial;
-//
-//                                        view.translationSelectorDialog(serial.getTranslations());
-//
-////                                        onStart();
-//
-//                                        view.fillToolbar(serial.getTitle());
-//                                        view.checkSubscribed(serial.isSubscibed());
-//
-//                                        Log.d(TAG, "loadData: serial: " + serial);
-//                                        view.showLoading(false);
-//                                    },
-//                                    Throwable::printStackTrace)
-//            );
         } else {
             startVideo(url);
         }
+        changeDescription();
     }
 
     private void startVideo(String url) {
@@ -122,13 +65,15 @@ class VideoPresenter {
 
     void onStart() {
         if (serial != null) {
-            if (!serial.getCurrentTranslation().getEpisodes().get(serial.getCurrentEpisode()).getType().equals(2))
-                changeVideoSource(serial.getCurrentEpisode());
+            if (!serial.getCurrentSeason().getEpisode(serial.getCurrentEpisodeIndex()).getType().equals(2))
+                changeVideoSource();
         }
     }
 
-    void buildDialog() {
-        view.translationSelectorDialog(serial.getTranslations());
+    void onBuildDialog() {
+        view.translationSelectorDialog(
+                serial.getCurrentSeason().getEpisode(serial.getCurrentEpisodeIndex()).getTranslations()
+        );
     }
 
     private void sendErrorMsg(String msg) {
@@ -143,43 +88,27 @@ class VideoPresenter {
         }
     }
 
-
-    void putToSubscribe(String id, boolean checked) {
-        disposables.add(
-                serialPlayer.subscribeRequest(id, checked)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                val -> Log.d(TAG, "answer: " + val),
-                                throwable -> {
-                                    sendErrorMsg(throwable.getMessage());
-                                    throwable.printStackTrace();
-                                }
-                        )
-        );
+    void onChangeEpisode(int position) {
+        if (position >= serial.getCurrentSeason().getEpisodes().size())
+            position = serial.getCurrentSeason().getEpisodes().size() - 1;
+        serial.setCurrentEpisodeIndex(position);
+        Log.d(TAG, "getEpisode: " + serial.getCurrentEpisodeIndex());
+        changeVideoSource();
     }
 
-    void setEpisode(int position) {
-        if (position >= serial.getCurrentTranslation().getEpisodes().size())
-            position = serial.getCurrentTranslation().getEpisodes().size() - 1;
-        serial.setCurrentEpisode(position);
-        Log.d(TAG, "getEpisode: " + serial.getCurrentEpisode());
-        changeDescription();
-        changeVideoSource(position);
-    }
-
-    void setTranslation(int i) {
+    void onChangeTranslation(int i) {
         serial.setCurrentTranslationIndex(i);
-        view.initRecycle(serial.getTranslations().get(i));
-        setEpisode(serial.getCurrentEpisode());
+        changeVideoSource();
     }
 
     private void changeDescription() {
         view.changeDescription(
-                serial.getCurrentTranslation().getTitle(),
-                serial.getCurrentTranslation()
-                        .getEpisodes()
-                        .get(serial.getCurrentEpisode())
+                serial.getCurrentSeason()
+                        .getEpisode(serial.getCurrentEpisodeIndex())
+                        .getTranslation(serial.getCurrentTranslationIndex())
+                        .getTitle(),
+                serial.getCurrentSeason()
+                        .getEpisode(serial.getCurrentEpisodeIndex())
                         .getTitle()
         );
     }

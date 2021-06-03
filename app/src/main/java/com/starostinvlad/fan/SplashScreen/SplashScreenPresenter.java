@@ -4,28 +4,13 @@ import android.app.DownloadManager;
 import android.database.Cursor;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.starostinvlad.fan.Api.SettingsNetworkService;
 import com.starostinvlad.fan.App;
 import com.starostinvlad.fan.BuildConfig;
-import com.starostinvlad.fan.VideoScreen.PlayerModel.PlayerDataDeserializer;
-import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.MultipartBody;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 class SplashScreenPresenter {
     private final String TAG = getClass().getSimpleName();

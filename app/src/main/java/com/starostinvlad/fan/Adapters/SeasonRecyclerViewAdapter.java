@@ -11,7 +11,7 @@ import com.starostinvlad.fan.VideoScreen.PlayerModel.Episode;
 import com.starostinvlad.fan.R;
 
 
-import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -20,12 +20,12 @@ import androidx.recyclerview.widget.RecyclerView;
 public class SeasonRecyclerViewAdapter extends RecyclerView.Adapter<SeasonRecyclerViewAdapter.ViewHolder> {
 
     private String TAG = getClass().getSimpleName();
-    private ArrayList<Episode> episodes;
+    private List<Episode> episodes;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
     // data is passed into the constructor
-    public SeasonRecyclerViewAdapter(Context context, ArrayList<Episode> episodes) {
+    public SeasonRecyclerViewAdapter(Context context, List<Episode> episodes) {
         this.mInflater = LayoutInflater.from(context);
         this.episodes = episodes;
         Log.d(TAG, "initialize");
@@ -35,7 +35,7 @@ public class SeasonRecyclerViewAdapter extends RecyclerView.Adapter<SeasonRecycl
     @Override
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.recyclerview_item, parent, false);
+        View view = mInflater.inflate(R.layout.episodes_in_videoscreen_item, parent, false);
         Log.d(TAG, "createViewHolder");
         return new ViewHolder(view);
     }

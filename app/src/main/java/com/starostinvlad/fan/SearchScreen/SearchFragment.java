@@ -13,6 +13,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.fan.Adapters.SearchListAdapter;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
 import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
 import java.util.List;
@@ -93,7 +94,8 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             Log.d(TAG, arr.get(i).getTitle());
             searchFragmentPresenter.addInHistory(arr.get(i));
-            VideoActivity.start(getActivity(), arr.get(i));
+//            VideoActivity.start(getActivity(), arr.get(i));
+            SerialPageScreenActivity.start(getActivity(), arr.get(i));
         });
     }
 

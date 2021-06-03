@@ -12,7 +12,6 @@ import android.util.Log;
 import com.appodeal.ads.Appodeal;
 import com.appodeal.ads.Native;
 import com.starostinvlad.fan.BuildConfig;
-import com.starostinvlad.fan.HDSeria.HdSeriaActivity;
 import com.starostinvlad.fan.MainActivity.MainActivity;
 import com.starostinvlad.fan.R;
 
@@ -32,11 +31,11 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setTitle("Загрузка обновления");
+//        setContentView(R.layout.activity_splash);
+//
+//        progressDialog = new ProgressDialog(this);
+//        progressDialog.setCancelable(false);
+//        progressDialog.setTitle("Загрузка обновления");
 
         Appodeal.setTesting(BuildConfig.DEBUG);
 //        Appodeal.setLogLevel(com.appodeal.ads.utils.Log.LogLevel.verbose);
@@ -53,7 +52,6 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
     @Override
     public void startNextActivity() {
         MainActivity.start(this);
-//        HdSeriaActivity.start(this);
         finish();
     }
 
@@ -87,7 +85,7 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
 
     @Override
     public void startInstallIntent() {
-        progressDialog.dismiss();
+//        progressDialog.dismiss();
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(getExternalFilesDir(null) + "/app.apk");
         Log.d("UpdateApp", "path: " + file.getAbsolutePath());
@@ -99,7 +97,7 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
 
     @Override
     public void showProgressDialog() {
-        progressDialog.show();
+//        progressDialog.show();
     }
 }
 

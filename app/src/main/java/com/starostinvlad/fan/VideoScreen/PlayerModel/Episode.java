@@ -1,13 +1,29 @@
 package com.starostinvlad.fan.VideoScreen.PlayerModel;
 
-import java.util.ArrayList;
+import java.io.Serializable;
+import java.util.List;
 
-public class Episode {
+import androidx.annotation.NonNull;
+
+public class Episode implements Serializable {
     private Integer id;
-    private Integer parent;
     private String title;
     private Integer number;
-    private Integer type;
+    private Integer type = 2;
+    private List<Translation> translations;
+    private int currentTranslationIndex;
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{ ").append(number).append(" : [");
+        for (Translation translation : translations) {
+            stringBuilder.append(translation.toString());
+        }
+        stringBuilder.append("] }");
+        return stringBuilder.toString();
+    }
 
     public Integer getType() {
         return type;
@@ -23,14 +39,6 @@ public class Episode {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getParent() {
-        return parent;
-    }
-
-    public void setParent(Integer parent) {
-        this.parent = parent;
     }
 
     public String getTitle() {
@@ -49,13 +57,15 @@ public class Episode {
         this.number = number;
     }
 
-    public String getUrl() {
-        return url;
+    public List<Translation> getTranslations() {
+        return translations;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public Translation getTranslation(int index) {
+        return translations.get(index < translations.size() ? index : 0);
     }
 
-    private String url;
+    void setTranslations(List<Translation> translations) {
+        this.translations = translations;
+    }
 }

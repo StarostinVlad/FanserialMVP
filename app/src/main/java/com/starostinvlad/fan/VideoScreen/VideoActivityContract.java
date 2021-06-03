@@ -1,15 +1,16 @@
 package com.starostinvlad.fan.VideoScreen;
 
-import com.starostinvlad.fan.GsonModels.Episode;
+import com.starostinvlad.fan.VideoScreen.PlayerModel.Episode;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Hls;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Translation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface VideoActivityContract {
     void showLoading(boolean b);
 
-    void translationSelectorDialog(ArrayList<Translation> translations);
+    void translationSelectorDialog(List<Translation> translations);
 
     void qualitySelectorDialog();
 
@@ -17,17 +18,10 @@ public interface VideoActivityContract {
 
     void initPlayer(Hls hls);
 
-    void initRecycle(Translation translation);
+    void initRecycle(List<Episode> episodes);
 
     void alarm(String message);
 
-    void checkViewed(boolean viewed);
-
-    void checkSubscribed(boolean subscribed);
-
-    void prevBtn(Episode episode);
-
-    void nextBtn(Episode episode);
 
     void showDialog(String msg);
 

@@ -12,6 +12,8 @@ import com.squareup.picasso.Picasso;
 import com.starostinvlad.fan.BlurTransformation;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
+import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenContract;
 import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 //        if (viewType == 0) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_list_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_item, parent, false);
         return new ViewHolder(view);
 //        } else {
 //            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_gridview_ad_item, parent, false);
@@ -48,7 +50,8 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 //        if (getItemViewType(position) == 0) {
         ViewHolder viewHolder = (ViewHolder) holder;
-        viewHolder.fill(elements.get(position));
+        if (position < elements.size())
+            viewHolder.fill(elements.get(position));
 //        } else {
 //            // Span the item if active
 //            final ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
@@ -86,9 +89,9 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         ViewHolder(View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.search_item_header);
-            subTitle = itemView.findViewById(R.id.search_item_description);
-            imageView = itemView.findViewById(R.id.search_item_poster);
+            title = itemView.findViewById(R.id.title_item_id);
+            subTitle = itemView.findViewById(R.id.subtitle_item_id);
+            imageView = itemView.findViewById(R.id.image_item_id);
         }
 
         void fill(News news) {
@@ -103,7 +106,8 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     .into(imageView);
             itemView.setOnClickListener(view1 -> {
                 Log.d(TAG, "click: " + news.getTitle());
-                VideoActivity.start((Activity) itemView.getContext(), news);
+                SerialPageScreenActivity.start((Activity) itemView.getContext(), news);
+//                VideoActivity.start((Activity) itemView.getContext(), news);
             });
         }
     }

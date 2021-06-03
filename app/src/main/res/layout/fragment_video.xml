@@ -23,15 +23,26 @@
             app:rewind_increment="10000"
             app:show_timeout="2000"
             app:surface_type="surface_view"
-
             />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/doubleClickArea"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#00000000"
+        android:clickable="true"
+        android:focusable="false"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        />
+
 
     <ProgressBar
         android:id="@+id/video_progress_id"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
-        android:visibility="gone" />
+        android:visibility="gone"
+        />
 
 </FrameLayout>

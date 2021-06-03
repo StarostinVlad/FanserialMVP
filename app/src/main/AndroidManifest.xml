@@ -5,7 +5,6 @@
 
     <application
         android:name=".App"
-        android:allowBackup="true"
         android:banner="@drawable/banner"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -14,8 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning,UnusedAttribute">
-        <activity android:name=".HDSeria.HdSeriaActivity"></activity>
-        <activity android:name=".SplashScreen.SplashActivity">
+        <activity
+            android:name=".SerialPageScreen.SerialPageScreenActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"></activity>
+        <activity android:name=".SplashScreen.SplashActivity"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -67,7 +69,7 @@
                 <action android:name="com.google.android.c2dm.permission.RECEIVE" />
             </intent-filter>
         </service>
-    </application>
+    </application> <!-- optional -->
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" /> <!-- optional -->
@@ -75,8 +77,8 @@
         android:name="android.software.leanback"
         android:required="false" /> <!-- optional -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- optional -->
-    <uses-permission android:name="android.permission.INTERNET" /> <!-- optional -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- partially optional -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- partially optional -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
