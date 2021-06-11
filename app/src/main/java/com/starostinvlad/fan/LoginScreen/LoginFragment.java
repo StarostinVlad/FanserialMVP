@@ -41,6 +41,14 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
     }
 
     @Override
+    public void onDestroy() {
+        if (presenter != null) {
+            presenter.detach();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_login, container, false);

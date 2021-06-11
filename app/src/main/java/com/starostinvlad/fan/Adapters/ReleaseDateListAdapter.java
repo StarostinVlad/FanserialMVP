@@ -15,12 +15,12 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class SimpleTextListAdapter extends RecyclerView.Adapter<SimpleTextListAdapter.ViewHolder> {
+public class ReleaseDateListAdapter extends RecyclerView.Adapter<ReleaseDateListAdapter.ViewHolder> {
     private final String TAG = getClass().getSimpleName();
     private LayoutInflater mInflater;
     private List<String> itemList;
 
-    public SimpleTextListAdapter(Context context) {
+    public ReleaseDateListAdapter(Context context) {
         this.mInflater = LayoutInflater.from(context);
         itemList = Collections.emptyList();
     }
@@ -33,17 +33,14 @@ public class SimpleTextListAdapter extends RecyclerView.Adapter<SimpleTextListAd
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.serial_page_info_item, parent, false);
+        View view = mInflater.inflate(R.layout.serial_page_release_date_item, parent, false);
         Log.d(TAG, "createViewHolder");
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String[] arr = itemList.get(position).split(":");
-        holder.textViewTitle.setText(arr[0]);
-        if (arr.length > 1)
-            holder.textViewBody.setText(arr[1]);
+            holder.textViewBody.setText(itemList.get(position));
     }
 
     @Override

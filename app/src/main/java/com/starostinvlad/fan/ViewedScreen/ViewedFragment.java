@@ -32,6 +32,14 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
         setRetainInstance(true);
     }
 
+    @Override
+    public void onDestroy() {
+        if (presenter != null) {
+            presenter.detach();
+        }
+        super.onDestroy();
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

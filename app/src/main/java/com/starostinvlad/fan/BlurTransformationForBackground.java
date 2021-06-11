@@ -9,17 +9,16 @@ import android.renderscript.ScriptIntrinsicBlur;
 
 import com.squareup.picasso.Transformation;
 
-public class BlurTransformation implements Transformation {
+public class BlurTransformationForBackground implements Transformation {
 
     private RenderScript rs;
-    public BlurTransformation(Context context) {
+    public BlurTransformationForBackground(Context context) {
         super();
         rs = RenderScript.create(context);
     }
 
     @Override
     public Bitmap transform(Bitmap bitmap) {
-        if (App.getInstance().isReview()) {
             // Create another bitmap that will hold the results of the filter.
             Bitmap blurredBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 
@@ -32,7 +31,7 @@ public class BlurTransformation implements Transformation {
             script.setInput(input);
 
             // Set the blur radius
-            script.setRadius(25);
+            script.setRadius(10);
 
             // Start the ScriptIntrinisicBlur
             script.forEach(output);
@@ -42,13 +41,10 @@ public class BlurTransformation implements Transformation {
 
             bitmap.recycle();
             return blurredBitmap;
-        } else
-            return bitmap;
-
     }
 
     @Override
     public String key() {
-        return "blur";
+        return "blurForBackground";
     }
 }

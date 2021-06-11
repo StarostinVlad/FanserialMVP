@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.BaseMVP.BasePresenter;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.NewsScreen.NewsModel;
 
@@ -25,7 +26,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 
-class ViewedPresenter {
+class ViewedPresenter extends BasePresenter {
     private final String TAG = getClass().getSimpleName();
     private final ViewedFragmentContract view;
     private final NewsModel newsModel;
@@ -39,8 +40,9 @@ class ViewedPresenter {
     void loadData() {
         view.showLoading(true);
         view.showButton(false);
-        Observable.fromCallable(newsModel::getFavorites)
-                .doOnNext(this::updateSubcribtions)
+        disposables.add(newsModel.getFavorites()
+                .subscribeOn(Schedulers.io())
+                .doAfterSuccess(this::updateSubcribtions)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(
@@ -53,11 +55,11 @@ class ViewedPresenter {
                             view.showLoading(false);
                             view.showButton(true);
                         }
-                ).isDisposed();
+                ));
     }
 
     private void updateSubcribtions(List<News> news) {
-        Observable.just(news)
+        disposables.add(Observable.just(news)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .flatMapIterable(val -> val)
@@ -66,6 +68,6 @@ class ViewedPresenter {
                 .subscribe(
                         val -> Log.d(TAG, "updateSubcribtions successed: " + val),
                         Throwable::printStackTrace
-                ).isDisposed();
+                ));
     }
 }

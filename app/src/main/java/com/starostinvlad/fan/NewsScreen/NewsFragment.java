@@ -39,6 +39,14 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         setRetainInstance(true);
     }
 
+    @Override
+    public void onDestroy() {
+        if (newsPresenter != null) {
+            newsPresenter.detach();
+        }
+        super.onDestroy();
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

@@ -3,16 +3,14 @@ package com.starostinvlad.fan.SerialPageScreen;
 import android.util.Log;
 
 import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.BaseMVP.BasePresenter;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 
-import java.util.HashSet;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class SerialPageScreenPresenter extends BasePresenter {
+class SerialPageScreenPresenter extends BasePresenter {
 
     private final SerialPageScreenContract view;
     private final SerialPlayer serialPlayer;

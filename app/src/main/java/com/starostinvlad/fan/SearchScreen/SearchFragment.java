@@ -39,6 +39,14 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
         setRetainInstance(true);
     }
 
+    @Override
+    public void onDestroy() {
+        if (searchFragmentPresenter != null) {
+            searchFragmentPresenter.detach();
+        }
+        super.onDestroy();
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

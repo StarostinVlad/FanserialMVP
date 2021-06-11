@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.util.Rational;
 import android.view.GestureDetector;
@@ -29,6 +30,7 @@ import com.appodeal.ads.Appodeal;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
@@ -91,6 +93,7 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
             intent.putExtra("SERIAL", serial);
         activity.startActivity(intent);
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -310,8 +313,8 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
         Log.d(TAG, "OnPip mode");
         this.isInPictureInPictureMode = isInPictureInPictureMode;
-        if (player != null)
-            player.seekTo(currentPosition);
+//        if (player != null)
+//            player.seekTo(currentPosition);
     }
 
     @Override
@@ -371,6 +374,10 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
     public void onStart() {
         super.onStart();
         videoPresenter.onStart();
+        MediaSessionCompat mediaSession = new MediaSessionCompat(this,getPackageName());
+        MediaSessionConnector mediaSessionConnector = new MediaSessionConnector(mediaSession);
+        mediaSessionConnector.setPlayer(player);
+        mediaSession.setActive(true);
     }
 
     @Override

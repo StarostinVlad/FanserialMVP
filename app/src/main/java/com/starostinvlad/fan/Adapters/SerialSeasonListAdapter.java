@@ -39,7 +39,7 @@ public class SerialSeasonListAdapter extends RecyclerView.Adapter<SerialSeasonLi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.serial_page_info_item, parent, false);
+        View view = mInflater.inflate(R.layout.serial_page_season_list_item, parent, false);
         Log.d(TAG, "createViewHolder");
         return new ViewHolder(view);
     }
@@ -60,7 +60,7 @@ public class SerialSeasonListAdapter extends RecyclerView.Adapter<SerialSeasonLi
 
         ViewHolder(View itemView) {
             super(itemView);
-            textView = itemView.findViewById(R.id.serialPageInfoListItem);
+            textView = itemView.findViewById(R.id.serialPageInfoListSeasonTitle);
             itemView.setOnClickListener(this);
         }
 

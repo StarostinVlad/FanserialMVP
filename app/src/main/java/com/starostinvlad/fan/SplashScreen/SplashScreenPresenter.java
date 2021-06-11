@@ -6,13 +6,14 @@ import android.util.Log;
 
 import com.starostinvlad.fan.Api.SettingsNetworkService;
 import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.BaseMVP.BasePresenter;
 import com.starostinvlad.fan.BuildConfig;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-class SplashScreenPresenter {
+class SplashScreenPresenter extends BasePresenter {
     private final String TAG = getClass().getSimpleName();
     private SplashScreenContract view;
     private String referer = "";
@@ -22,30 +23,34 @@ class SplashScreenPresenter {
     }
 
     void loadSettings() {
-        SettingsNetworkService
-                .getInstance()
-                .getApi()
-                .getSettings()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(val -> {
-                    Log.d(TAG, "loadSettings: " + val.getDomain());
-                    App.getInstance().setClient(val.getProxy());
-                    App.getInstance().setDomain(val.getDomain());
-                    App.getInstance().setReview(val.getReview());
-                    App.getInstance().setLastVersion(val.getLastVersion());
-                    if (val.getLastVersion() > BuildConfig.VERSION_CODE && !val.getReview())
-                        view.showUpdateDialog();
-                    else
-                        view.startNextActivity();
-                }).isDisposed();
+        disposables.add(
+                SettingsNetworkService
+                        .getInstance()
+                        .getApi()
+                        .getSettings()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(val -> {
+                            Log.d(TAG, "loadSettings: " + val.getDomain());
+                            App.getInstance().setClient(val.getProxy());
+                            App.getInstance().setDomain(val.getDomain());
+                            App.getInstance().setReview(val.getReview());
+                            App.getInstance().setLastVersion(val.getLastVersion());
+                            if (val.getLastVersion() > BuildConfig.VERSION_CODE && !val.getReview())
+                                view.showUpdateDialog();
+                            else
+                                view.startNextActivity();
+                        })
+        );
     }
 
     void loadUpdate(long id, DownloadManager downloadManager) {
         view.showProgressDialog();
-        Observable.fromCallable(() -> loadApk(id, downloadManager))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(val -> view.startInstallIntent(), Throwable::printStackTrace).isDisposed();
+        disposables.add(
+                Observable.fromCallable(() -> loadApk(id, downloadManager))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(val -> view.startInstallIntent(), Throwable::printStackTrace)
+        );
     }
 
     private boolean loadApk(long id, DownloadManager downloadManager) {

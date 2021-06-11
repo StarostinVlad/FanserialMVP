@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import okhttp3.MultipartBody;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -27,18 +30,30 @@ public class NewsModel {
     private List<News> episodeList;
     private int page = 1;
 
-    List<News> addNews() throws IOException {
-        page++;
-        episodeList.addAll(
-                loadNewsList(App.getInstance().getDomain() + "/novinki-serialov/page/" + page)
-        );
-        return episodeList;
+    Maybe<List<News>> addNews() {
+        return Maybe.create(emitter -> {
+            try {
+                page++;
+                episodeList.addAll(
+                        loadNewsList(App.getInstance().getDomain() + "/novinki-serialov/page/" + page)
+                );
+                emitter.onSuccess(episodeList);
+            } catch (Exception e) {
+                emitter.onError(e);
+            }
+        });
 
     }
 
-    List<News> loadNews() throws IOException {
-        episodeList = loadNewsList(App.getInstance().getDomain() + "/novinki-serialov/");
-        return episodeList;
+    Maybe<List<News>> loadNews(){
+        return Maybe.create(emitter -> {
+            try {
+                episodeList = loadNewsList(App.getInstance().getDomain() + "/novinki-serialov/");
+                emitter.onSuccess(episodeList);
+            } catch (Exception e) {
+                emitter.onError(e);
+            }
+        });
     }
 
     private List<News> loadNewsList(String url) throws IOException {
@@ -104,12 +119,18 @@ public class NewsModel {
         this.episodeList = episodeList;
     }
 
-    public List<News> getFavorites() throws IOException {
-        Request favoritesPageRequest = new Request.Builder()
-                .url(App.getInstance().getDomain() + "/favorites")
-                .get()
-                .build();
-        Response response = App.getInstance().getOkHttpClient().newCall(favoritesPageRequest).execute();
-        return parseDocumentToNews(response);
+    public Maybe<List<News>> getFavorites() {
+        return Maybe.create(emitter -> {
+            try {
+                Request favoritesPageRequest = new Request.Builder()
+                        .url(App.getInstance().getDomain() + "/favorites")
+                        .get()
+                        .build();
+                Response response = App.getInstance().getOkHttpClient().newCall(favoritesPageRequest).execute();
+                emitter.onSuccess(parseDocumentToNews(response));
+            } catch (Exception e) {
+                emitter.onError(e);
+            }
+        });
     }
 }

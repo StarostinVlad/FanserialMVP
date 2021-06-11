@@ -29,6 +29,14 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
     private ProgressDialog progressDialog;
 
     @Override
+    protected void onDestroy() {
+        if (presenter != null) {
+            presenter.detach();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_splash);

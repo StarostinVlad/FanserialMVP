@@ -3,6 +3,7 @@ package com.starostinvlad.fan.VideoScreen;
 import android.util.Log;
 
 import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.BaseMVP.BasePresenter;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Season;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
@@ -11,11 +12,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-class VideoPresenter {
+class VideoPresenter extends BasePresenter {
     private static final String TAG = VideoPresenter.class.getSimpleName();
     private final VideoActivityContract view;
     private Serial serial = null;
-    private CompositeDisposable disposables = new CompositeDisposable();
     private SerialPlayer serialPlayer;
 
     VideoPresenter(VideoActivityContract view) {
@@ -65,8 +65,7 @@ class VideoPresenter {
 
     void onStart() {
         if (serial != null) {
-            if (!serial.getCurrentSeason().getEpisode(serial.getCurrentEpisodeIndex()).getType().equals(2))
-                changeVideoSource();
+            changeVideoSource();
         }
     }
 
