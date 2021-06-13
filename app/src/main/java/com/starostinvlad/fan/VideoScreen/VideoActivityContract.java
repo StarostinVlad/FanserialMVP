@@ -1,5 +1,6 @@
 package com.starostinvlad.fan.VideoScreen;
 
+import com.starostinvlad.fan.BaseMVP.MvpView;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Episode;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Hls;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Translation;
@@ -7,7 +8,7 @@ import com.starostinvlad.fan.VideoScreen.PlayerModel.Translation;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface VideoActivityContract {
+public interface VideoActivityContract extends MvpView {
     void showLoading(boolean b);
 
     void translationSelectorDialog(List<Translation> translations);

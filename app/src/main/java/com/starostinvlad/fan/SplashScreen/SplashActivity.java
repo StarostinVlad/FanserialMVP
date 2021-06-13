@@ -3,7 +3,6 @@ package com.starostinvlad.fan.SplashScreen;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,14 +12,13 @@ import com.appodeal.ads.Appodeal;
 import com.appodeal.ads.Native;
 import com.starostinvlad.fan.BuildConfig;
 import com.starostinvlad.fan.MainActivity.MainActivity;
-import com.starostinvlad.fan.R;
 
 import java.io.File;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-import io.reactivex.Observable;
+
 
 public class SplashActivity extends AppCompatActivity implements SplashScreenContract {
 
@@ -31,7 +29,7 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
     @Override
     protected void onDestroy() {
         if (presenter != null) {
-            presenter.detach();
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -52,7 +50,8 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
         Appodeal.initialize(this, "5b840848384e83385753354fd57248b212fbd0a454d85083", Appodeal.INTERSTITIAL | Appodeal.NATIVE);
 
 
-        presenter = new SplashScreenPresenter(this);
+        presenter = new SplashScreenPresenter();
+        presenter.attachView(this);
         presenter.loadSettings();
     }
 

@@ -9,20 +9,20 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.material.snackbar.Snackbar;
 import com.starostinvlad.fan.Adapters.SearchListAdapter;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
-import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.BehaviorSubject;
 
@@ -30,7 +30,7 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
     private final String TAG = getClass().getSimpleName();
     private ProgressBar searchProgressBar;
     private ListView listView;
-    private SearchFragmentPresenter searchFragmentPresenter;
+    private SearchFragmentPresenter presenter;
     private BehaviorSubject<String> searchQuery = BehaviorSubject.createDefault("");
 
     @Override
@@ -41,8 +41,8 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
 
     @Override
     public void onDestroy() {
-        if (searchFragmentPresenter != null) {
-            searchFragmentPresenter.detach();
+        if (presenter != null) {
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -56,9 +56,10 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
         searchProgressBar = view.findViewById(R.id.search_progressbar);
         listView = view.findViewById(R.id.search_listview);
 
-        searchFragmentPresenter = new SearchFragmentPresenter(this);
+        presenter = new SearchFragmentPresenter();
+        presenter.attachView(this);
 
-        searchFragmentPresenter.getHistory();
+        presenter.getHistory();
 
         searchQuery
                 .filter(s -> s.length() > 3)
@@ -66,7 +67,7 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        searchFragmentPresenter::searchQuery
+                        presenter::searchQuery
                         , Throwable::printStackTrace
                 )
                 .isDisposed();
@@ -101,7 +102,7 @@ public class SearchFragment extends Fragment implements SearchFragmentContract {
         listView.setAdapter(new SearchListAdapter(arr));
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             Log.d(TAG, arr.get(i).getTitle());
-            searchFragmentPresenter.addInHistory(arr.get(i));
+            presenter.addInHistory(arr.get(i));
 //            VideoActivity.start(getActivity(), arr.get(i));
             SerialPageScreenActivity.start(getActivity(), arr.get(i));
         });

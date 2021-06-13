@@ -8,20 +8,19 @@ import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.NewsScreen.NewsModel;
 import com.starostinvlad.fan.SearchedDao;
 
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 
-class SearchFragmentPresenter extends BasePresenter {
+class SearchFragmentPresenter extends BasePresenter<SearchFragmentContract> {
     private final String TAG = getClass().getSimpleName();
-    private final SearchFragmentContract view;
-    private final NewsModel newsModel;
+    private NewsModel newsModel;
     private SearchedDao searchedDao = App.getInstance().getDatabase().searchedDao();
     private boolean loading;
 
-    SearchFragmentPresenter(SearchFragmentContract view) {
-        this.view = view;
+    @Override
+    public void attachView(SearchFragmentContract mvpView) {
+        super.attachView(mvpView);
         newsModel = new NewsModel();
     }
 
@@ -30,7 +29,7 @@ class SearchFragmentPresenter extends BasePresenter {
             loading = true;
             view.showLoading(true);
             disposables.add(
-                    Observable.fromCallable(() -> newsModel.search(query))
+                    newsModel.search(query)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(

@@ -10,7 +10,6 @@ import android.widget.ProgressBar;
 
 import com.starostinvlad.fan.Adapters.ViewedListAdapter;
 import com.starostinvlad.fan.GsonModels.News;
-import com.starostinvlad.fan.GsonModels.Viewed;
 import com.starostinvlad.fan.R;
 
 import java.util.List;
@@ -35,7 +34,7 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
     @Override
     public void onDestroy() {
         if (presenter != null) {
-            presenter.detach();
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -52,7 +51,8 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
 
         reload_btn.setOnClickListener(v -> presenter.loadData());
 
-        presenter = new ViewedPresenter(this);
+        presenter = new ViewedPresenter();
+        presenter.attachView(this);
 
 //        presenter.updateSubcribtions();
 

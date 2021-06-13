@@ -26,7 +26,7 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
 
     final int LANDSCAPE_COUNT = 4;
     final int PORTRAIT_COUNT = 2;
-    private NewsPresenter newsPresenter;
+    private NewsPresenter presenter;
     private String TAG = getClass().getSimpleName();
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -41,8 +41,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
 
     @Override
     public void onDestroy() {
-        if (newsPresenter != null) {
-            newsPresenter.detach();
+        if (presenter != null) {
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -52,7 +52,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_news, container, false);
         initViews(view);
-        newsPresenter = new NewsPresenter(this);
+        presenter = new NewsPresenter();
+        presenter.attachView(this);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -61,13 +62,13 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
                 int viewId = staggeredGridLayoutManager.findFirstCompletelyVisibleItemPositions(null)[0];
                 Log.d(TAG, String.format("onCreateView: last: %d", viewId));
                 if (viewId >= newsRecyclerViewAdapter.getItemCount() * 0.5f)
-                    newsPresenter.addNews();
+                    presenter.addNews();
             }
         });
 
-        swipeRefreshLayout.setOnRefreshListener(newsPresenter::refreshNews);
+        swipeRefreshLayout.setOnRefreshListener(presenter::refreshNews);
 
-        newsPresenter.loadNews();
+        presenter.loadNews();
 
         return view;
     }

@@ -1,9 +1,10 @@
 package com.starostinvlad.fan.SerialPageScreen;
 
+import com.starostinvlad.fan.BaseMVP.MvpView;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 
-public interface SerialPageScreenContract {
+public interface SerialPageScreenContract extends MvpView {
     void showLoading(boolean show);
 
     void fillPage(SerialPlayer serialPlayer);
