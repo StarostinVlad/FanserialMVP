@@ -1,6 +1,8 @@
 package com.starostinvlad.fan.SplashScreen;
 
-public interface SplashScreenContract {
+import com.starostinvlad.fan.BaseMVP.MvpView;
+
+public interface SplashScreenContract extends MvpView {
     void startNextActivity();
 
     void showUpdateDialog();

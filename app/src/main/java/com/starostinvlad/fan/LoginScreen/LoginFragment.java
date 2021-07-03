@@ -16,12 +16,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.starostinvlad.fan.App;
-import com.starostinvlad.fan.R;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.starostinvlad.fan.App;
+import com.starostinvlad.fan.R;
 
 public class LoginFragment extends Fragment implements LoginFragmentContract {
 
@@ -43,7 +42,7 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
     @Override
     public void onDestroy() {
         if (presenter != null) {
-            presenter.detach();
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -59,7 +58,8 @@ public class LoginFragment extends Fragment implements LoginFragmentContract {
         nameField = view.findViewById(R.id.name_field);
         progress = view.findViewById(R.id.login_progress);
         loginContainer = view.findViewById(R.id.login_container);
-        presenter = new LoginPresenter(this);
+        presenter = new LoginPresenter();
+        presenter.attachView(this);
 
         ProgressDialog progressDialog = new ProgressDialog(getContext());
         progressDialog.setMessage("Загрузка");

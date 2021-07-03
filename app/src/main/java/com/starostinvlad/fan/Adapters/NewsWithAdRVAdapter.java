@@ -38,8 +38,7 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private OnItemClickListener onItemClickListener;
 
     public void setElements(List<News> elements) {
-        this.elements.clear();
-        this.elements.addAll(elements);
+        this.elements = elements;
         notifyDataSetChanged();
     }
 

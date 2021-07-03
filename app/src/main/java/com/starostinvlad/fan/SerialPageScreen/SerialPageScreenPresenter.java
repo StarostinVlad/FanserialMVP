@@ -11,15 +11,15 @@ import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-class SerialPageScreenPresenter extends BasePresenter {
+class SerialPageScreenPresenter extends BasePresenter<SerialPageScreenContract> {
 
-    private final SerialPageScreenContract view;
-    private final SerialPlayer serialPlayer;
+    private SerialPlayer serialPlayer;
     private Serial serial;
     private final String TAG = getClass().getSimpleName();
 
-    SerialPageScreenPresenter(SerialPageScreenContract serialPageScreenContract) {
-        this.view = serialPageScreenContract;
+    @Override
+    public void attachView(SerialPageScreenContract mvpView) {
+        super.attachView(mvpView);
         serialPlayer = new SerialPlayer(App.getInstance().getDomain(), App.getInstance().getOkHttpClient());
     }
 

@@ -14,7 +14,6 @@ import android.widget.ProgressBar;
 
 import com.starostinvlad.fan.Adapters.ViewedListAdapter;
 import com.starostinvlad.fan.GsonModels.News;
-import com.starostinvlad.fan.GsonModels.Viewed;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
 
@@ -46,7 +45,7 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
     @Override
     public void onDestroy() {
         if (presenter != null) {
-            presenter.detach();
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -81,6 +80,9 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
         reload_btn = view.findViewById(R.id.reload_viewed_list);
         reload_btn.setOnClickListener(v -> presenter.loadData());
 
+        presenter = new ViewedPresenter();
+        presenter.attachView(this);
+
         UiModeManager uiMode = (UiModeManager) getContext().getSystemService(Context.UI_MODE_SERVICE);
         if (uiMode != null && uiMode.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             staggeredGridLayoutManager.setSpanCount(3);
@@ -93,7 +95,6 @@ public class ViewedFragment extends Fragment implements ViewedFragmentContract {
             SerialPageScreenActivity.start((AppCompatActivity) getContext(), news);
         });
 
-        presenter = new ViewedPresenter(this);
         presenter.loadData();
 
     }
