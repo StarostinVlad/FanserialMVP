@@ -48,7 +48,7 @@ public class EpisodeRecyclerViewAdapter extends RecyclerView.Adapter<EpisodeRecy
         Log.d(TAG, "onBindViewHolder");
         Episode episode = episodes.get(position);
         holder.myTextView.setText(episode.getName());
-        Picasso.with(holder.itemView.getContext())
+        Picasso.get()
                 .load(episode.getImages().getSmall())
                 //.transform(App.getInstance().isReview() ? new BlurTransformation(holder.itemView.getContext()) : new CropSquareTransformation())
                 .placeholder(R.color.cardview_dark_background)

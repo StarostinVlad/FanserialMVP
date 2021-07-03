@@ -1,6 +1,8 @@
 package com.starostinvlad.fan.Adapters;
 
+import android.app.UiModeManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,36 +12,35 @@ import android.widget.TextView;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Season;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class SerialSeasonListAdapter extends RecyclerView.Adapter<SerialSeasonListAdapter.ViewHolder> {
     private final String TAG = getClass().getSimpleName();
     private LayoutInflater mInflater;
-    private List<Season> itemList;
+    private List<Season> itemList = new ArrayList<>();
     private ItemClickListener itemClickListener;
 
     public void setItemClickListener(ItemClickListener itemClickListener) {
         this.itemClickListener = itemClickListener;
     }
 
-    public SerialSeasonListAdapter(Context context) {
-        this.mInflater = LayoutInflater.from(context);
-        itemList = Collections.emptyList();
-    }
-
     public void setItemList(List<Season> infoList) {
-        this.itemList = infoList;
+        itemList.clear();
+        this.itemList.addAll(infoList);
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.serial_page_season_list_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.serial_page_season_list_item, parent, false);
         Log.d(TAG, "createViewHolder");
         return new ViewHolder(view);
     }
@@ -61,6 +62,13 @@ public class SerialSeasonListAdapter extends RecyclerView.Adapter<SerialSeasonLi
         ViewHolder(View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.serialPageInfoListSeasonTitle);
+            itemView.setOnFocusChangeListener((view, b) -> {
+                if (b) {
+                    itemView.animate().scaleY(1.2f).scaleX(1.2f).z(1.2f).start();
+                } else {
+                    itemView.animate().scaleY(1f).scaleX(1f).z(1f).start();
+                }
+            });
             itemView.setOnClickListener(this);
         }
 

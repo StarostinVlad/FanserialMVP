@@ -8,14 +8,13 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.MediaItem;
-import com.ironsource.environment.StringUtils;
 import com.starostinvlad.fan.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SubtitlesAdapter extends BaseAdapter {
-    List<MediaItem.Subtitle> subtitles;
+    private List<MediaItem.Subtitle> subtitles;
 
     public SubtitlesAdapter(List<MediaItem.Subtitle> subtitles) {
         this.subtitles = subtitles;

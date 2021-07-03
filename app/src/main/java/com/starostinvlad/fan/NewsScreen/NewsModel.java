@@ -35,7 +35,7 @@ public class NewsModel {
             try {
                 page++;
                 episodeList.addAll(
-                        loadNewsList(App.getInstance().getDomain() + "/novinki-serialov/page/" + page)
+                        loadNewsList(App.getInstance().getDomain() + "/page/" + page)
                 );
                 emitter.onSuccess(episodeList);
             } catch (Exception e) {
@@ -48,7 +48,7 @@ public class NewsModel {
     Maybe<List<News>> loadNews(){
         return Maybe.create(emitter -> {
             try {
-                episodeList = loadNewsList(App.getInstance().getDomain() + "/novinki-serialov/");
+                episodeList = loadNewsList(App.getInstance().getDomain());
                 emitter.onSuccess(episodeList);
             } catch (Exception e) {
                 emitter.onError(e);

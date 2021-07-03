@@ -51,7 +51,7 @@ public class SearchListAdapter extends BaseAdapter {
         description.setText(list.get(i).getSubTitle());
 
         ImageView imageView = view.findViewById(R.id.search_item_poster);
-        Picasso.with(viewGroup.getContext())
+        Picasso.get()
                 .load(list.get(i).getImage())
                 .transform(new BlurTransformation(viewGroup.getContext()))
                 .placeholder(R.color.cardview_dark_background)

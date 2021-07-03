@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.starostinvlad.fan.App;
 import com.starostinvlad.fan.BaseMVP.BasePresenter;
+import com.starostinvlad.fan.GsonModels.CurrentSerial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Season;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -90,6 +92,23 @@ class VideoPresenter extends BasePresenter {
     void onChangeEpisode(int position) {
         if (position >= serial.getCurrentSeason().getEpisodes().size())
             position = serial.getCurrentSeason().getEpisodes().size() - 1;
+        int finalPosition = position;
+        disposables.add(
+                App.getInstance().getDatabase().currentSerialDao()
+                        .insert(
+                                new CurrentSerial(
+                                        serial.getId(),
+                                        serial.getCurrentSeasonIndex(),
+                                        finalPosition,
+                                        serial.getCurrentTranslationIndex()
+                                )
+                        )
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(
+                                val -> Log.d(TAG, "changeVideoSource: " + val),
+                                Throwable::printStackTrace
+                        )
+        );
         serial.setCurrentEpisodeIndex(position);
         Log.d(TAG, "getEpisode: " + serial.getCurrentEpisodeIndex());
         changeVideoSource();

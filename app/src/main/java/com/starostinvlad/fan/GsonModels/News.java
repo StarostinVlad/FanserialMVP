@@ -1,11 +1,15 @@
 package com.starostinvlad.fan.GsonModels;
 
+import android.annotation.SuppressLint;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
@@ -35,12 +39,29 @@ public class News implements Serializable {
     public News() {
     }
 
+    @Ignore
     public News(String title, String subTitle, String image, String href, String siteId) {
         this.title = title;
         this.subTitle = subTitle;
         this.image = image;
         this.href = href;
         this.siteId = siteId;
+    }
+
+    @SuppressLint("DefaultLocale")
+    @NonNull
+    @Override
+    public String toString() {
+
+        return String.format(
+                "{id:%d, siteId:%s, title:%s, subTitle:%s, image:%s, href:%s}",
+                id,
+                siteId,
+                title,
+                subTitle,
+                image,
+                href
+        );
     }
 
     public String getTitle() {

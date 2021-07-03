@@ -1,5 +1,8 @@
 package com.starostinvlad.fan.NewsScreen;
 
+import android.app.Activity;
+import android.app.UiModeManager;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +15,7 @@ import com.starostinvlad.fan.Adapters.AppodealWrapperAdapter;
 import com.starostinvlad.fan.Adapters.NewsWithAdRVAdapter;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
+import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
 
 import java.util.List;
 
@@ -24,8 +28,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class NewsFragment extends Fragment implements NewsFragmentContract {
 
-    final int LANDSCAPE_COUNT = 4;
-    final int PORTRAIT_COUNT = 2;
+    private final int LANDSCAPE_COUNT = 4;
+    private final int PORTRAIT_COUNT = 2;
     private NewsPresenter newsPresenter;
     private String TAG = getClass().getSimpleName();
     private RecyclerView recyclerView;
@@ -51,6 +55,13 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_news, container, false);
+        setRetainInstance(true);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initViews(view);
         newsPresenter = new NewsPresenter(this);
 
@@ -64,12 +75,10 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
                     newsPresenter.addNews();
             }
         });
-
         swipeRefreshLayout.setOnRefreshListener(newsPresenter::refreshNews);
 
         newsPresenter.loadNews();
 
-        return view;
     }
 
     private void initViews(View view) {
@@ -77,12 +86,20 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(PORTRAIT_COUNT, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(staggeredGridLayoutManager);
         newsRecyclerViewAdapter = new NewsWithAdRVAdapter();
-        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 12);
-        recyclerView.setAdapter(appodealWrapperAdapter);
-        int orientation = this.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        newsRecyclerViewAdapter.setOnItemClickListener(news -> {
+            Log.d(TAG, "click: " + news.getTitle());
+            SerialPageScreenActivity.start((Activity) getContext(), news);
+        });
+//        AppodealWrapperAdapter appodealWrapperAdapter = new AppodealWrapperAdapter(newsRecyclerViewAdapter, 12);
+        recyclerView.setAdapter(newsRecyclerViewAdapter);
+        UiModeManager uiMode = (UiModeManager) getContext().getSystemService(Context.UI_MODE_SERVICE);
+        if (uiMode != null && uiMode.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            Log.d(TAG, "initViews: is TV!");
+            staggeredGridLayoutManager.setSpanCount(5);
+        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             staggeredGridLayoutManager.setSpanCount(LANDSCAPE_COUNT);
         }
+
         swipeRefreshLayout = view.findViewById(R.id.news_swipe_refresh_id);
     }
 

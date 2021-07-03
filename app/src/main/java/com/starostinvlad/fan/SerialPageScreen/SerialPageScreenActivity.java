@@ -6,7 +6,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +33,8 @@ import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 import com.starostinvlad.fan.VideoScreen.VideoActivity;
 
+import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
+
 public class SerialPageScreenActivity extends AppCompatActivity implements SerialPageScreenContract {
 
     private News episode;
@@ -45,7 +49,7 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
     private SerialSeasonListAdapter serialSeasonsAdapter;
     private boolean subscribed;
     private final String TAG = getClass().getSimpleName();
-
+    UiModeManager uiModeManager;
 
     public static void start(Activity context, News news) {
         Intent intent = new Intent(context, SerialPageScreenActivity.class);
@@ -64,11 +68,15 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_serial_page);
+        uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+        if (uiModeManager != null && uiModeManager.getCurrentModeType() == UI_MODE_TYPE_TELEVISION)
+            setContentView(R.layout.activity_serial_page_tv);
+        else
+            setContentView(R.layout.activity_serial_page);
         serialPageInfoAdapter = new SimpleTextListAdapter(this);
         serialPageReleaseDatesAdapter = new ReleaseDateListAdapter(this);
 
-        serialSeasonsAdapter = new SerialSeasonListAdapter(this);
+        serialSeasonsAdapter = new SerialSeasonListAdapter();
 
         toolbar = findViewById(R.id.toolbarSerialScreen);
         description = findViewById(R.id.serialPageDescription);
@@ -77,6 +85,14 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
         openSerial.setOnClickListener(view -> {
             serialPageScreenPresenter.openSerialOnClick();
         });
+        openSerial.setOnFocusChangeListener(((view, b) -> {
+            if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
+                if (b) {
+                    view.animate().scaleY(1.2f).scaleX(1.2f).z(1.2f).start();
+                } else {
+                    view.animate().scaleY(1f).scaleX(1f).z(1f).start();
+                }
+        }));
 
         RecyclerView serialPageInfoList = findViewById(R.id.serialPageInfoList);
         serialPageInfoList.setNestedScrollingEnabled(false);
@@ -114,17 +130,22 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
     }
 
     @Override
+    public void fillBtn(int currentSeasonIndex, int currentEpisodeIndex) {
+        openSerial.setText("Открыть " + currentSeasonIndex + " сезон " + currentEpisodeIndex + " серию");
+    }
+
+    @Override
     public void fillPage(SerialPlayer serialPlayer) {
 
         toolbar.setTitle(serialPlayer.getTitle());
         setSupportActionBar(toolbar);
 
-        Picasso.with(this)
+        Picasso.get()
                 .load(episode.getImage())
                 .transform(new BlurTransformation(this))
                 .placeholder(R.drawable.banner)
                 .into(imageView);
-        Picasso.with(this)
+        Picasso.get()
                 .load(episode.getImage())
                 .transform(new BlurTransformationForBackground(this))
                 .placeholder(R.drawable.banner)

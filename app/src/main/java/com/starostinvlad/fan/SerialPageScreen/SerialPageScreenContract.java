@@ -15,4 +15,6 @@ public interface SerialPageScreenContract {
     void checkViewed(boolean viewed);
 
     void checkSubscribed(boolean subscribed);
+
+    void fillBtn(int currentSeason, int currentEpisodeIndex);
 }

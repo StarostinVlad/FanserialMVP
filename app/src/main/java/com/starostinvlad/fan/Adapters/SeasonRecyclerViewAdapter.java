@@ -1,6 +1,8 @@
 package com.starostinvlad.fan.Adapters;
 
+import android.app.UiModeManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +67,13 @@ public class SeasonRecyclerViewAdapter extends RecyclerView.Adapter<SeasonRecycl
             myView = itemView.findViewById(R.id.card_item_id);
             myTextView = itemView.findViewById(R.id.tvAnimalName);
             itemView.setOnClickListener(this);
+            itemView.setOnFocusChangeListener((view, b) -> {
+                    if (b) {
+                        itemView.animate().scaleY(1.2f).scaleX(1.2f).z(1.2f).start();
+                    } else {
+                        itemView.animate().scaleY(1f).scaleX(1f).z(1f).start();
+                    }
+            });
         }
 
         @Override

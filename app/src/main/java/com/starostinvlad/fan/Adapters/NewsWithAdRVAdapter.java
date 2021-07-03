@@ -1,6 +1,9 @@
 package com.starostinvlad.fan.Adapters;
 
 import android.app.Activity;
+import android.app.UiModeManager;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +13,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.starostinvlad.fan.BlurTransformation;
+import com.starostinvlad.fan.BuildConfig;
 import com.starostinvlad.fan.GsonModels.News;
 import com.starostinvlad.fan.R;
 import com.starostinvlad.fan.SerialPageScreen.SerialPageScreenActivity;
@@ -27,9 +31,15 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final String TAG = getClass().getSimpleName();
     private List<News> elements = new ArrayList<>();
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    private OnItemClickListener onItemClickListener;
+
     public void setElements(List<News> elements) {
-        this.elements = elements;
-//        this.elements.add(8, null);
+        this.elements.clear();
+        this.elements.addAll(elements);
         notifyDataSetChanged();
     }
 
@@ -99,16 +109,27 @@ public class NewsWithAdRVAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             subTitle.setText(news.getSubTitle());
 
-            Picasso.with(itemView.getContext())
+            Picasso.get()
                     .load(news.getImage())
                     .placeholder(R.color.cardview_dark_background)
                     .transform(new BlurTransformation(itemView.getContext()))
                     .into(imageView);
+
+            itemView.setOnFocusChangeListener((view, b) -> {
+                if (b) {
+                    itemView.animate().scaleY(1.2f).scaleX(1.2f).z(1.2f).start();
+                } else {
+                    itemView.animate().scaleY(1f).scaleX(1f).z(1f).start();
+                }
+            });
             itemView.setOnClickListener(view1 -> {
-                Log.d(TAG, "click: " + news.getTitle());
-                SerialPageScreenActivity.start((Activity) itemView.getContext(), news);
+                onItemClickListener.OnItemClick(news);
 //                VideoActivity.start((Activity) itemView.getContext(), news);
             });
         }
+    }
+
+    public interface OnItemClickListener {
+        void OnItemClick(News news);
     }
 }

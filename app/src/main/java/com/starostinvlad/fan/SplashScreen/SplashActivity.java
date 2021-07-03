@@ -49,7 +49,7 @@ public class SplashActivity extends AppCompatActivity implements SplashScreenCon
 //        Appodeal.setLogLevel(com.appodeal.ads.utils.Log.LogLevel.verbose);
         Appodeal.setRequiredNativeMediaAssetType(Native.MediaAssetType.ICON);
         Appodeal.setNativeAdType(Native.NativeAdType.Auto);
-        Appodeal.initialize(this, "5b840848384e83385753354fd57248b212fbd0a454d85083", Appodeal.INTERSTITIAL | Appodeal.NATIVE);
+        Appodeal.initialize(this, "5b840848384e83385753354fd57248b212fbd0a454d85083", Appodeal.INTERSTITIAL);
 
 
         presenter = new SplashScreenPresenter(this);

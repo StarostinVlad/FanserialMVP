@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.starostinvlad.fan.App;
 import com.starostinvlad.fan.BaseMVP.BasePresenter;
+import com.starostinvlad.fan.GsonModels.CurrentSerial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.Serial;
 import com.starostinvlad.fan.VideoScreen.PlayerModel.SerialPlayer;
 
@@ -43,10 +44,36 @@ class SerialPageScreenPresenter extends BasePresenter {
         disposables.add(
                 serialPlayer
                         .getSerial(url)
+                        .flatMap(
+                                val -> App.getInstance()
+                                        .getDatabase()
+                                        .currentSerialDao()
+                                        .getById(val.getId())
+                                        .defaultIfEmpty(new CurrentSerial(
+                                                val.getId(),
+                                                val.getCurrentSeasonIndex(),
+                                                val.getCurrentEpisodeIndex(),
+                                                val.getCurrentTranslationIndex()
+                                        )),
+                                ((serial1, currentSerial) -> {
+                                    if (currentSerial != null) {
+                                        serial1.setCurrentSeasonIndex(currentSerial.getCurrentSeasonIndex());
+                                        serial1.setCurrentEpisodeIndex(currentSerial.getCurrentEpisodeIndex());
+                                        serial1.setCurrentTranslationIndex(currentSerial.getCurrentTranslationIndex());
+                                    }
+                                    return serial1;
+                                })
+                        )
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(serial -> {
                             this.serial = serial;
+
+                            view.fillBtn(
+                                    serial.getCurrentSeasonIndex() + 1,
+                                    serial.getCurrentEpisodeIndex() + 1
+                            );
+
                             view.fillPage(serialPlayer);
                             view.fillSeasonsList(serial);
 

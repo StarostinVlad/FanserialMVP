@@ -22,6 +22,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/serialPageInfoList"
                 android:layout_width="0dp"
+                android:focusable="true"
+                android:nextFocusDown="@id/serialSeasonList"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:orientation="vertical"
@@ -34,13 +36,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:nextFocusDown="@id/serialPageDescription"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <TextView
             android:id="@+id/serialPageDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            android:focusable="true"
+            android:nextFocusDown="@id/serialPageReleaseDates"/>
 
         <TextView
             android:id="@+id/titleReleaseDate"

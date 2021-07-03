@@ -34,61 +34,16 @@ import okhttp3.Response;
 public class SerialPlayer {
     private final String TAG = getClass().getSimpleName();
     private String referer = "https://seriahd.tv";
-    private String hash;
+    private String hash = "";
 
     private String DOMAIN = "";
     private OkHttpClient CLIENT;
     private String playerHost = "";
     private String title = "";
-
-    public List<String> getInfoList() {
-        return infoList;
-    }
-
-    public void setInfoList(List<String> infoList) {
-        this.infoList = infoList;
-    }
-
-    private List<String> infoList = new ArrayList<>();
-
-    public List<String> getReleaseDates() {
-        return releaseDates;
-    }
-
-    public void setReleaseDates(List<String> releaseDates) {
-        this.releaseDates = releaseDates;
-    }
-
-    private List<String> releaseDates = new ArrayList<>();
-
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     private String description = "";
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public boolean isSubscribed() {
-        return subscribed;
-    }
-
-    public void setSubscribed(boolean subscribed) {
-        this.subscribed = subscribed;
-    }
-
+    private List<String> releaseDates = new ArrayList<>();
     private boolean subscribed;
+    private String pageId = "";
 
     public SerialPlayer(String DOMAIN, OkHttpClient okHttpClient) {
         this.DOMAIN = DOMAIN;
@@ -149,6 +104,7 @@ public class SerialPlayer {
 
     private Document loadSerialPageFromUrl(String url) throws IOException {
         String currentUrl = url.contains(DOMAIN) ? url : DOMAIN + url;
+
         referer = currentUrl;
         Request getSeriaPage = new Request.Builder()
                 .addHeader("referer", currentUrl)
@@ -166,10 +122,17 @@ public class SerialPlayer {
         return null;
     }
 
-    public Observable<Serial> getSerial(String url) {
-        return Observable.create(emitter -> {
+    public Maybe<Serial> getSerial(String url) {
+        return Maybe.create(emitter -> {
             try {
                 Document document = loadSerialPageFromUrl(url);
+
+                pageId = url.substring(url.lastIndexOf("/"));
+
+                pageId = pageId.substring(1, pageId.indexOf("-"));
+
+                Log.d(TAG, "loadSerialPageFromUrl: pageID: " + pageId);
+
                 hash = document.getElementsByAttributeValue("name", "user_hash").attr("value");
 
                 title = document.getElementsByAttributeValue("property", "og:title").attr("content");
@@ -204,12 +167,13 @@ public class SerialPlayer {
                     result = result.replace("ifr:", "http").replace("\\", "");
                     Log.d(TAG, "getSerial: EXIST SECOND PLAYER! " + result);
                     serial = parseSerialFromSecondPlayer(getSecondPlayerPageFromUrl(result));
-                    emitter.onNext(serial);
+                    serial.setId(pageId);
                 } else {
                     serial = parseSerialFromDefautPlayer(document);
-                    emitter.onNext(serial);
+                    serial.setId(pageId);
 //                    throw new Exception("Данный сериал не поддерживается в приложении!");
                 }
+                emitter.onSuccess(serial);
             } catch (Exception e) {
                 emitter.onError(e);
             } finally {
@@ -217,10 +181,8 @@ public class SerialPlayer {
             }
         });
     }
-    // TODO: 12.04.2021 разделить плеер и страницу сериала на две модели
-    // TODO: 12.04.2021 оформить правильный нейминг 
+    // TODO: 12.04.2021 оформить правильный нейминг
     // TODO: 12.04.2021 собрать все файлы для работы с сайтом в отдельный пакет бизнес логики
-    // TODO: 12.04.2021 попробовать переоформить структуру сериала(сезон->серия->озвучка)
 
     private Document getSecondPlayerPageFromUrl(String url) throws IOException {
         Request getSeriaPage = new Request.Builder()
@@ -306,5 +268,47 @@ public class SerialPlayer {
                 emitter.onComplete();
             }
         });
+    }
+
+    public List<String> getInfoList() {
+        return infoList;
+    }
+
+    public void setInfoList(List<String> infoList) {
+        this.infoList = infoList;
+    }
+
+    private List<String> infoList = new ArrayList<>();
+
+    public List<String> getReleaseDates() {
+        return releaseDates;
+    }
+
+    public void setReleaseDates(List<String> releaseDates) {
+        this.releaseDates = releaseDates;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        this.subscribed = subscribed;
     }
 }

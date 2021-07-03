@@ -6,8 +6,10 @@ import java.util.List;
 import androidx.annotation.NonNull;
 
 public class Serial implements Serializable {
-    private List<Season> seasonList;
 
+    private String id;
+
+    private List<Season> seasonList;
     private int currentSeasonIndex = 0;
     private int currentEpisodeIndex = 0;
     private int currentTranslationCode = 0;
@@ -22,6 +24,14 @@ public class Serial implements Serializable {
         }
         str.append("]");
         return str.toString();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Season getCurrentSeason() {
