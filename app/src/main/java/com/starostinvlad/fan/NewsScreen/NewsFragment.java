@@ -30,7 +30,7 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
 
     private final int LANDSCAPE_COUNT = 4;
     private final int PORTRAIT_COUNT = 2;
-    private NewsPresenter newsPresenter;
+    private NewsPresenter presenter;
     private String TAG = getClass().getSimpleName();
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -45,8 +45,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
 
     @Override
     public void onDestroy() {
-        if (newsPresenter != null) {
-            newsPresenter.detach();
+        if (presenter != null) {
+            presenter.detachView();
         }
         super.onDestroy();
     }
@@ -63,7 +63,8 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initViews(view);
-        newsPresenter = new NewsPresenter(this);
+        presenter = new NewsPresenter();
+        presenter.attachView(this);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -72,13 +73,13 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
                 int viewId = staggeredGridLayoutManager.findFirstCompletelyVisibleItemPositions(null)[0];
                 Log.d(TAG, String.format("onCreateView: last: %d", viewId));
                 if (viewId >= newsRecyclerViewAdapter.getItemCount() * 0.5f)
-                    newsPresenter.addNews();
+                    presenter.addNews();
             }
         });
-        swipeRefreshLayout.setOnRefreshListener(newsPresenter::refreshNews);
 
-        newsPresenter.loadNews();
+        swipeRefreshLayout.setOnRefreshListener(presenter::refreshNews);
 
+        presenter.loadNews();
     }
 
     private void initViews(View view) {
@@ -99,7 +100,6 @@ public class NewsFragment extends Fragment implements NewsFragmentContract {
         } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             staggeredGridLayoutManager.setSpanCount(LANDSCAPE_COUNT);
         }
-
         swipeRefreshLayout = view.findViewById(R.id.news_swipe_refresh_id);
     }
 

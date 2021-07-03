@@ -1,6 +1,8 @@
 package com.starostinvlad.fan.LoginScreen;
 
-public interface LoginFragmentContract {
+import com.starostinvlad.fan.BaseMVP.MvpView;
+
+public interface LoginFragmentContract extends MvpView {
     void showLoading(boolean load);
 
     void alarm(String message);

@@ -152,7 +152,8 @@ public class VideoActivity extends AppCompatActivity implements VideoActivityCon
 
         doubleClickArea = findViewById(R.id.doubleClickArea);
 
-        videoPresenter = new VideoPresenter(this);
+        videoPresenter = new VideoPresenter();
+        videoPresenter.attachView(this);
 
         if (getIntent() != null && getIntent().hasExtra("SERIAL")) {
             videoPresenter.onStartWithSerial((Serial) getIntent().getSerializableExtra("SERIAL"));

@@ -13,14 +13,10 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-class SplashScreenPresenter extends BasePresenter {
+class SplashScreenPresenter extends BasePresenter<SplashScreenContract> {
     private final String TAG = getClass().getSimpleName();
-    private SplashScreenContract view;
     private String referer = "";
 
-    SplashScreenPresenter(SplashScreenContract view) {
-        this.view = view;
-    }
 
     void loadSettings() {
         disposables.add(

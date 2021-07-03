@@ -14,14 +14,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-class VideoPresenter extends BasePresenter {
+class VideoPresenter extends BasePresenter<VideoActivityContract> {
     private static final String TAG = VideoPresenter.class.getSimpleName();
-    private final VideoActivityContract view;
     private Serial serial = null;
     private SerialPlayer serialPlayer;
 
-    VideoPresenter(VideoActivityContract view) {
-        this.view = view;
+    @Override
+    public void attachView(VideoActivityContract mvpView) {
+        super.attachView(mvpView);
         serialPlayer = new SerialPlayer(App.getInstance().getDomain(), App.getInstance().getOkHttpClient());
     }
 

@@ -26,16 +26,15 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 
-class ViewedPresenter extends BasePresenter {
+class ViewedPresenter extends BasePresenter<ViewedFragmentContract> {
     private final String TAG = getClass().getSimpleName();
-    private final ViewedFragmentContract view;
-    private final NewsModel newsModel;
+    private NewsModel newsModel;
 
-    ViewedPresenter(ViewedFragmentContract view) {
-        this.view = view;
+    @Override
+    public void attachView(ViewedFragmentContract mvpView) {
+        super.attachView(mvpView);
         newsModel = new NewsModel();
     }
-
 
     void loadData() {
         view.showLoading(true);

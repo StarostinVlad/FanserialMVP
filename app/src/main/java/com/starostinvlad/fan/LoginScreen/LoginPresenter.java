@@ -11,7 +11,6 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 
 import io.reactivex.Maybe;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
@@ -20,13 +19,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
-class LoginPresenter extends BasePresenter {
+class LoginPresenter extends BasePresenter<LoginFragmentContract> {
     private final String TAG = getClass().getSimpleName();
-    private LoginFragmentContract view;
-
-    LoginPresenter(LoginFragmentContract view) {
-        this.view = view;
-    }
 
     void loginApi(String email, String pass) {
         view.showLoading(true);
@@ -37,6 +31,7 @@ class LoginPresenter extends BasePresenter {
                         .subscribe(
                                 document -> {
                                     String login = document.select("#login-box").attr("title");
+                                    view.showLoading(false);
                                     if (!login.equals("Авторизация")) {
                                         App.getInstance().getLoginSubject().onNext(login);
                                         Log.d(TAG, "login: " + login);
@@ -45,7 +40,6 @@ class LoginPresenter extends BasePresenter {
                                         Log.d(TAG, "loginApi: errors: " + errors);
                                         view.alarm(errors);
                                     }
-                                    view.showLoading(false);
                                 },
                                 e -> {
                                     Log.d(TAG, "message: " + e.toString());

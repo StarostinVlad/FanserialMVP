@@ -38,7 +38,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
 public class SerialPageScreenActivity extends AppCompatActivity implements SerialPageScreenContract {
 
     private News episode;
-    private SerialPageScreenPresenter serialPageScreenPresenter;
+    private SerialPageScreenPresenter presenter;
     private ProgressBar progressBar;
     private TextView description, titleReleaseDate;
     private Toolbar toolbar;
@@ -60,8 +60,8 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
 
     @Override
     protected void onDestroy() {
-        if (serialPageScreenPresenter != null)
-            serialPageScreenPresenter.detach();
+        if (presenter != null)
+            presenter.detachView();
         super.onDestroy();
     }
 
@@ -83,7 +83,7 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
         titleReleaseDate = findViewById(R.id.titleReleaseDate);
         openSerial = findViewById(R.id.btnOpenSerial);
         openSerial.setOnClickListener(view -> {
-            serialPageScreenPresenter.openSerialOnClick();
+            presenter.openSerialOnClick();
         });
         openSerial.setOnFocusChangeListener(((view, b) -> {
             if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
@@ -117,9 +117,10 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
         if (getIntent() != null && getIntent().hasExtra(getString(R.string.episode_extra)))
             episode = (News) getIntent().getSerializableExtra(getString(R.string.episode_extra));
 
-        serialPageScreenPresenter = new SerialPageScreenPresenter(this);
+        presenter = new SerialPageScreenPresenter();
+        presenter.attachView(this);
 
-        serialPageScreenPresenter.loadData(episode.getHref());
+        presenter.loadData(episode.getHref());
 
 
     }
@@ -147,8 +148,8 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
                 .into(imageView);
         Picasso.get()
                 .load(episode.getImage())
-                .transform(new BlurTransformationForBackground(this))
                 .placeholder(R.drawable.banner)
+                .transform(new BlurTransformationForBackground(this))
                 .into(backgroundImage);
         description.setText(serialPlayer.getDescription());
         serialPageInfoAdapter.setItemList(serialPlayer.getInfoList());
@@ -169,7 +170,7 @@ public class SerialPageScreenActivity extends AppCompatActivity implements Seria
                 return true;
             case R.id.subscribe_checker:
                 item.setChecked(!item.isChecked());
-                serialPageScreenPresenter.putToSubscribe(episode.getSiteId(), item.isChecked());
+                presenter.putToSubscribe(episode.getSiteId(), item.isChecked());
                 if (item.isChecked()) {
                     item.setIcon(R.drawable.ic_favorite_checked);
                     FirebaseMessaging.getInstance().subscribeToTopic(episode.getSiteId());

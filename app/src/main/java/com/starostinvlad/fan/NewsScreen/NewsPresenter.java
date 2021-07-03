@@ -8,16 +8,12 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-class NewsPresenter extends BasePresenter {
+class NewsPresenter extends BasePresenter<NewsFragmentContract> {
 
     private final String TAG = getClass().getSimpleName();
-    private NewsFragmentContract view;
     private NewsModel newsModel;
     private boolean loading = false;
 
-    NewsPresenter(NewsFragmentContract view) {
-        this.view = view;
-    }
 
     void refreshNews() {
         newsModel = null;
