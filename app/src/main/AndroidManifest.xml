@@ -15,7 +15,7 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning,UnusedAttribute">
         <activity
             android:name=".SerialPageScreen.SerialPageScreenActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"></activity>
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation" />
         <activity android:name=".SplashScreen.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
