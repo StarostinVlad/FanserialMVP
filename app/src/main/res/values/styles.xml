@@ -2,6 +2,14 @@
 
     <!-- Base application theme. -->
 
+    <style name="CustomBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+    </style>
+
+    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -10,9 +18,14 @@
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
     </style>
+
     <style name="SplashTheme" parent="AppTheme.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:background">@drawable/splash_background</item>
+    </style>
+
+    <style name="SplashDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:background">@color/colorPrimary</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
